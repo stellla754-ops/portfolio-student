@@ -482,7 +482,7 @@ function renderResume(){
     + '<span>PDF</span>'
     + '<span class="file-name">'+escapeHtml(r.name)+'</span>'
     + '<span class="file-date">'+escapeHtml(r.date)+'</span>'
-    + '<a class="ghost" style="text-decoration:none; display:inline-block; padding:6px 12px;" href="'+r.data+'" target="_blank" rel="noopener">Відкрити</a>'
+    + '<button class="ghost" type="button" data-open-pdf="resume">Відкрити</button>'
     + '<button class="ghost danger" id="resume-delete">Видалити</button>'
     + '</div>';
 }
@@ -526,7 +526,7 @@ function renderTests(){
       + '<span>PDF</span>'
       + '<span class="file-name">'+escapeHtml(t.name)+'</span>'
       + '<span class="file-date">'+escapeHtml(t.date)+'</span>'
-      + '<a class="ghost" style="text-decoration:none; display:inline-block; padding:6px 12px;" href="'+t.data+'" target="_blank" rel="noopener">Відкрити</a>'
+      + '<button class="ghost" type="button" data-open-pdf="test" data-test-id="'+t.id+'">Відкрити</button>'
       + '<button class="ghost danger" data-del-test="'+t.id+'">Видалити</button>'
       + '</div>';
   }).join('');
@@ -573,6 +573,21 @@ function metricHtml(label, num, pct){
     + '<div class="label">'+label+'</div>'
     + '<div class="bar-track"><div class="bar-fill" style="width:'+pct+'%"></div></div>'
     + '</div>';
+}
+
+function openPdfDataUri(dataUri){
+  try{
+    const base64 = dataUri.split(',')[1];
+    const byteChars = atob(base64);
+    const byteNumbers = new Array(byteChars.length);
+    for(let i=0;i<byteChars.length;i++){ byteNumbers[i] = byteChars.charCodeAt(i); }
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], {type:'application/pdf'});
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+  }catch(e){
+    alert('Не вдалося відкрити файл');
+  }
 }
 
 function escapeHtml(s){
@@ -649,6 +664,10 @@ document.getElementById('save-career').addEventListener('click', ()=>{
 });
 
 document.getElementById('career-checklist').addEventListener('click', (e)=>{
+  if(e.target.dataset.openPdf === 'resume'){
+    if(state.career.resume) openPdfDataUri(state.career.resume.data);
+    return;
+  }
   if(e.target.id === 'resume-btn'){
     document.getElementById('resume-input').click();
     return;
@@ -759,6 +778,11 @@ document.getElementById('test-pdf-input').addEventListener('change', (e)=>{
   e.target.value = '';
 });
 document.getElementById('tests-list').addEventListener('click', (e)=>{
+  if(e.target.dataset.openPdf === 'test'){
+    const t = state.career.tests.find(x=>x.id === e.target.dataset.testId);
+    if(t) openPdfDataUri(t.data);
+    return;
+  }
   const id = e.target.dataset.delTest;
   if(!id) return;
   (async ()=>{
