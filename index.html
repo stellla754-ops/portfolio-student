@@ -482,7 +482,7 @@ function renderResume(){
     + '<span>PDF</span>'
     + '<span class="file-name">'+escapeHtml(r.name)+'</span>'
     + '<span class="file-date">'+escapeHtml(r.date)+'</span>'
-    + '<a class="ghost" style="text-decoration:none; display:inline-block; padding:6px 12px;" href="'+r.data+'" download="'+escapeHtml(r.name)+'">Відкрити</a>'
+    + '<a class="ghost" style="text-decoration:none; display:inline-block; padding:6px 12px;" href="'+r.data+'" target="_blank" rel="noopener">Відкрити</a>'
     + '<button class="ghost danger" id="resume-delete">Видалити</button>'
     + '</div>';
 }
@@ -526,7 +526,7 @@ function renderTests(){
       + '<span>PDF</span>'
       + '<span class="file-name">'+escapeHtml(t.name)+'</span>'
       + '<span class="file-date">'+escapeHtml(t.date)+'</span>'
-      + '<a class="ghost" style="text-decoration:none; display:inline-block; padding:6px 12px;" href="'+t.data+'" download="'+escapeHtml(t.name)+'">Відкрити</a>'
+      + '<a class="ghost" style="text-decoration:none; display:inline-block; padding:6px 12px;" href="'+t.data+'" target="_blank" rel="noopener">Відкрити</a>'
       + '<button class="ghost danger" data-del-test="'+t.id+'">Видалити</button>'
       + '</div>';
   }).join('');
