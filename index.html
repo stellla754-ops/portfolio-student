@@ -142,11 +142,17 @@
 
   .detail-block{margin:2px 0 18px 30px; padding:14px 16px; background:rgba(232,114,12,0.05); border-left:2px solid var(--brass); border-radius:0 4px 4px 0;}
   .detail-block label{margin-top:0;}
-  .entry-row{display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line);}
-  .entry-row:last-child{border-bottom:none;}
+  .entry-item{padding:9px 0; border-bottom:1px solid var(--line);}
+  .entry-item:last-child{border-bottom:none;}
+  .entry-row{display:flex; align-items:center; gap:10px;}
   .entry-main{flex:1;}
   .entry-company{font-size:14px; font-weight:500;}
   .entry-role{font-size:12.5px; color:var(--ink); opacity:0.65;}
+  .curator-feedback{margin-top:8px; padding-left:2px;}
+  .curator-feedback label{font-size:10px; margin:0 0 4px;}
+  .curator-feedback textarea{width:100%; min-height:44px; font-size:12.5px;}
+  .curator-feedback button{margin-top:6px;}
+  .curator-feedback .save-note{margin-left:8px;}
 
   .save-note{font-size:12px; color:var(--sage); margin-top:10px; min-height:16px;}
   .toggle-form{margin-bottom:16px;}
@@ -162,7 +168,7 @@
   #logout-btn{position:fixed; top:14px; right:14px; z-index:50;}
 
   @media print{
-    .tabs, #save-pdf-btn, #photo-btn, #open-case-form, .case-actions, #case-form-card, #test-pdf-btn, .file-row a, .file-row button{ display:none !important; }
+    .tabs, #save-pdf-btn, #photo-btn, #open-case-form, .case-actions, #case-form-card, #add-test-btn, #test-pdf-input, .file-row button, [data-add-entry], [data-del-entry], .curator-feedback textarea, .curator-feedback button{ display:none !important; }
     section{ display:block !important; page-break-inside:avoid; margin-bottom:20px; }
     body{ background:#fff; }
     input, textarea, select{ border:1px solid var(--line); background:#fff; }
@@ -283,9 +289,20 @@
       </div>
       <div class="card">
         <h2 class="section-title">Результати тестів</h2>
-        <p class="hint" style="margin-top:0;">Завантаж PDF з результатами діагностики професійних інтересів, тестів на компетентності або інших опитувань.</p>
-        <input type="file" id="test-pdf-input" accept="application/pdf" style="display:none">
-        <button class="ghost" id="test-pdf-btn" type="button">Завантажити PDF</button>
+        <p class="hint" style="margin-top:0;">Додай назву тесту, дату проведення і, за бажанням, PDF з результатами.</p>
+        <div class="row">
+          <div>
+            <label>Назва тесту</label>
+            <input type="text" id="test-name" placeholder="Наприклад, діагностика професійних інтересів">
+          </div>
+          <div>
+            <label>Дата проведення</label>
+            <input type="date" id="test-date">
+          </div>
+        </div>
+        <label>PDF з результатами (необов'язково)</label>
+        <input type="file" id="test-pdf-input" accept="application/pdf">
+        <button class="primary" id="add-test-btn" type="button" style="margin-top:12px;">+ Додати тест</button>
         <div id="test-pdf-note" class="save-note"></div>
         <div id="tests-list" style="margin-top:14px;"></div>
       </div>
@@ -507,9 +524,17 @@ function renderEntries(key){
     return;
   }
   box.innerHTML = items.slice().reverse().map(e=>{
-    return '<div class="entry-row">'
+    return '<div class="entry-item">'
+      + '<div class="entry-row">'
       + '<div class="entry-main"><div class="entry-company">'+escapeHtml(e.company)+'</div><div class="entry-role">'+escapeHtml(e.role)+'</div></div>'
       + '<button class="ghost danger" data-del-entry="'+key+'|'+e.id+'">Видалити</button>'
+      + '</div>'
+      + '<div class="curator-feedback">'
+      + '<label>Відгук куратора</label>'
+      + '<textarea data-feedback-input="'+key+'|'+e.id+'" placeholder="Коментар куратора про цю пробу чи стажування">'+escapeHtml(e.feedback||'')+'</textarea>'
+      + '<button class="ghost" data-save-feedback="'+key+'|'+e.id+'" type="button">Зберегти відгук</button>'
+      + '<span class="save-note" data-feedback-note="'+key+'|'+e.id+'"></span>'
+      + '</div>'
       + '</div>';
   }).join('');
 }
@@ -523,13 +548,18 @@ function renderTests(){
   }
   box.innerHTML = tests.slice().reverse().map(t=>{
     return '<div class="file-row">'
-      + '<span>PDF</span>'
       + '<span class="file-name">'+escapeHtml(t.name)+'</span>'
-      + '<span class="file-date">'+escapeHtml(t.date)+'</span>'
-      + '<button class="ghost" type="button" data-open-pdf="test" data-test-id="'+t.id+'">Відкрити</button>'
+      + '<span class="file-date">'+(t.testDate ? formatDateUk(t.testDate) : '')+'</span>'
+      + (t.data ? '<button class="ghost" type="button" data-open-pdf="test" data-test-id="'+t.id+'">Відкрити PDF</button>' : '<span class="hint" style="margin:0;">без файлу</span>')
       + '<button class="ghost danger" data-del-test="'+t.id+'">Видалити</button>'
       + '</div>';
   }).join('');
+}
+
+function formatDateUk(iso){
+  const d = new Date(iso);
+  if(isNaN(d)) return iso;
+  return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear();
 }
 
 function renderClubs(){
@@ -562,7 +592,7 @@ function renderProgress(){
     + metricHtml('Кар\'єрний маршрут', careerDone+' з '+CAREER_STEPS.length+' кроків', careerPct)
     + metricHtml('Участь у спільнотах', clubCount+' з 4 клубів', clubPct)
     + metricHtml('Резюме', resumeReady ? 'завантажено' : 'ще немає', resumeReady ? 100 : 0)
-    + metricHtml('Результати тестів', testCount+' файл(ів)', testCount > 0 ? 100 : 0)
+    + metricHtml('Результати тестів', testCount+' тест(ів)', testCount > 0 ? 100 : 0)
     + metricHtml('Професійні проби', trialCount+' пройдено', trialCount > 0 ? 100 : 0)
     + metricHtml('Стажування і практика', internshipCount+' з '+internshipGoal, Math.min(100, Math.round(internshipCount/internshipGoal*100)));
 }
@@ -706,6 +736,19 @@ document.getElementById('career-checklist').addEventListener('click', (e)=>{
     saveState();
     return;
   }
+  const feedbackKey = e.target.dataset.saveFeedback;
+  if(feedbackKey){
+    const [key, id] = feedbackKey.split('|');
+    const textarea = document.querySelector('[data-feedback-input="'+key+'|'+id+'"]');
+    const note = document.querySelector('[data-feedback-note="'+key+'|'+id+'"]');
+    const entry = (state.career[key]||[]).find(x=>x.id === id);
+    if(entry && textarea){
+      entry.feedback = textarea.value;
+      saveState();
+      if(note){ note.textContent = 'Збережено'; setTimeout(()=>{ note.textContent=''; }, 1800); }
+    }
+    return;
+  }
 });
 
 document.getElementById('career-checklist').addEventListener('change', (e)=>{
@@ -747,36 +790,60 @@ document.getElementById('clubs-list').addEventListener('change', (e)=>{
   saveState('clubs-note');
 });
 
-document.getElementById('test-pdf-btn').addEventListener('click', ()=> document.getElementById('test-pdf-input').click());
-document.getElementById('test-pdf-input').addEventListener('change', (e)=>{
-  const file = e.target.files[0];
-  if(!file) return;
+document.getElementById('add-test-btn').addEventListener('click', ()=>{
+  const name = document.getElementById('test-name').value.trim();
+  const testDate = document.getElementById('test-date').value;
+  const fileInput = document.getElementById('test-pdf-input');
+  const file = fileInput.files[0];
   const note = document.getElementById('test-pdf-note');
-  if(file.type !== 'application/pdf'){
-    note.textContent = 'Можна завантажувати лише файли PDF';
-    return;
-  }
-  if(file.size > 700*1024){
-    note.textContent = 'Файл завеликий, обери PDF до 700 КБ';
-    return;
-  }
-  const reader = new FileReader();
-  reader.onload = async ()=>{
-    const docData = { kind:'test', name: file.name, date: new Date().toLocaleDateString('uk-UA'), data: reader.result };
-    try{
-      const ref = await filesCollectionRef().add(docData);
-      if(!state.career.tests) state.career.tests = [];
-      state.career.tests.push(Object.assign({id: ref.id}, docData));
-      renderTests();
-      renderProgress();
-      note.textContent = '';
-    }catch(err){
-      note.textContent = 'Не вдалося зберегти, спробуй ще раз';
+
+  if(!name){ note.textContent = 'Вкажи назву тесту'; return; }
+
+  if(file){
+    if(file.type !== 'application/pdf'){
+      note.textContent = 'Можна завантажувати лише файли PDF';
+      return;
     }
-  };
-  reader.readAsDataURL(file);
-  e.target.value = '';
+    if(file.size > 700*1024){
+      note.textContent = 'Файл завеликий, обери PDF до 700 КБ';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = async ()=>{
+      const docData = { kind:'test', name: name, testDate: testDate, date: new Date().toLocaleDateString('uk-UA'), data: reader.result };
+      try{
+        const ref = await filesCollectionRef().add(docData);
+        if(!state.career.tests) state.career.tests = [];
+        state.career.tests.push(Object.assign({id: ref.id}, docData));
+        finishAddTest(note);
+      }catch(err){
+        note.textContent = 'Не вдалося зберегти, спробуй ще раз';
+      }
+    };
+    reader.readAsDataURL(file);
+  } else {
+    (async ()=>{
+      const docData = { kind:'test', name: name, testDate: testDate, date: new Date().toLocaleDateString('uk-UA'), data: null };
+      try{
+        const ref = await filesCollectionRef().add(docData);
+        if(!state.career.tests) state.career.tests = [];
+        state.career.tests.push(Object.assign({id: ref.id}, docData));
+        finishAddTest(note);
+      }catch(err){
+        note.textContent = 'Не вдалося зберегти, спробуй ще раз';
+      }
+    })();
+  }
 });
+
+function finishAddTest(note){
+  document.getElementById('test-name').value = '';
+  document.getElementById('test-date').value = '';
+  document.getElementById('test-pdf-input').value = '';
+  renderTests();
+  renderProgress();
+  note.textContent = '';
+}
 document.getElementById('tests-list').addEventListener('click', (e)=>{
   if(e.target.dataset.openPdf === 'test'){
     const t = state.career.tests.find(x=>x.id === e.target.dataset.testId);
