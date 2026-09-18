@@ -208,6 +208,7 @@
 
   <nav class="tabs">
     <button class="tab-btn" data-tab="profile">Профіль</button>
+    <button class="tab-btn" data-tab="start">Старт</button>
     <button class="tab-btn" data-tab="cases">Кейси і проєкти</button>
     <button class="tab-btn" data-tab="career">Кар'єра</button>
     <button class="tab-btn" data-tab="clubs">Спільноти</button>
@@ -238,6 +239,91 @@
         <textarea id="p-goal" placeholder="Наприклад: хочу керувати командою власного бізнесу у сфері подій"></textarea>
         <button class="primary" id="save-profile" style="margin-top:16px;">Зберегти профіль</button>
         <div class="save-note" id="profile-note"></div>
+      </div>
+    </section>
+
+    <section id="tab-start">
+      <div class="card">
+        <h2 class="section-title">Стартова точка</h2>
+        <p class="hint" style="margin-top:0;">Заповнюється на початку навчання — куратором разом зі студентом, за 20 хвилин.</p>
+        <label>Чому обрав(ла) цю спеціальність?</label>
+        <textarea id="start-why" placeholder="Коротко, своїми словами"></textarea>
+        <label>Наскільки впевнений(а) у виборі (1–10)</label>
+        <input type="number" id="start-confidence" min="1" max="10" style="max-width:100px;">
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Досвід</h2>
+        <p class="hint" style="margin-top:0;">Що вже реально робив(ла) — оберіть усе, що підходить.</p>
+        <div id="start-experience-list"></div>
+        <label>Інше</label>
+        <input type="text" id="start-experience-other" placeholder="Щось, чого немає у списку">
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Що вміє робити</h2>
+        <p class="hint" style="margin-top:0;">Конкретні дії, а не риси характеру.</p>
+        <div id="start-skills-list"></div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Ситуаційний досвід</h2>
+        <label>Розкажи про ситуацію, коли ти сам(а) щось організував(ла)</label>
+        <textarea id="start-sit-organized"></textarea>
+        <label>Коли вирішував(ла) проблему</label>
+        <textarea id="start-sit-solved"></textarea>
+        <label>Коли працював(ла) з іншими</label>
+        <textarea id="start-sit-teamwork"></textarea>
+        <label>Коли не впорався / помилився(лась)</label>
+        <textarea id="start-sit-mistake"></textarea>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Що подобається</h2>
+        <p class="hint" style="margin-top:0;">Тип задач, а не назва професії.</p>
+        <div id="start-interests-list"></div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Робочий формат</h2>
+        <p class="hint" style="margin-top:0;">В яких умовах ти сильніший(а).</p>
+        <div id="start-format-list"></div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Професійні гіпотези</h2>
+        <p class="hint" style="margin-top:0;">Не «ким хочу бути», а що варто перевірити цього року — 2–3 напрями.</p>
+        <label>Гіпотеза 1</label>
+        <input type="text" id="start-hyp-0" placeholder="Наприклад, проєктний менеджмент">
+        <label>Гіпотеза 2</label>
+        <input type="text" id="start-hyp-1" placeholder="Наприклад, маркетинг">
+        <label>Гіпотеза 3</label>
+        <input type="text" id="start-hyp-2" placeholder="Необов'язково">
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Що перевірити цього року</h2>
+        <div id="start-totest-list"></div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Спостереження куратора</h2>
+        <div id="start-hrobs-list"></div>
+        <label>Рівень професійної визначеності</label>
+        <select id="start-certainty">
+          <option value="">Не визначено</option>
+          <option value="Висока">Висока</option>
+          <option value="Середня">Середня</option>
+          <option value="Низька">Низька</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Професійна задача на семестр</h2>
+        <p class="hint" style="margin-top:0;">Це і стане особистою ціллю студента — вона з'явиться у розділі "Прогрес".</p>
+        <textarea id="start-semester-task" placeholder="Наприклад: перевірити себе в ролі координатора реального проєкту"></textarea>
+        <button class="primary" id="save-start" style="margin-top:16px;">Зберегти стартовий профіль</button>
+        <div class="save-note" id="start-note"></div>
       </div>
     </section>
 
@@ -338,6 +424,7 @@
       <div class="progress-grid" id="progress-metrics"></div>
       <div class="card">
         <h2 class="section-title">Ціль на рік</h2>
+        <div id="personal-goal-box"></div>
         <p style="font-size:14px; line-height:1.6;">Стратегічна ціль коледжу — щонайменше 50% освітніх компонентів із проєктними завданнями, і щонайменше два реалізовані проєкти на кожного студента. Портфоліо показує твій особистий прогрес до цієї цілі.</p>
       </div>
     </section>
@@ -379,12 +466,38 @@ const CAREER_STEPS = [
 ];
 const CLUBS = ['Дебатний клуб','Кіноклуб','Книжковий клуб','Театральна студія'];
 
+const START_EXPERIENCE = ['Робота / підробіток','Волонтерство','Шкільні проєкти','Власні ініціативи','Організація заходів','Конкурси / олімпіади','Блог / соцмережі / контент'];
+const START_SKILLS = ['Організувати','Домовитися','Презентувати','Аналізувати інформацію','Писати тексти','Працювати з цифрами','Створювати контент','Працювати з людьми','Вести команду','Працювати самостійно','Використовувати AI'];
+const START_INTERESTS = ['Люди','Ідеї','Дані / цифри','Організація','Творчість','Дослідження','Продажі / переговори','Допомога людям','Технології','Управління'];
+const START_TOTEST = ['Професійна проба','Проєкт','Стажування','Волонтерство','Робота з реальним замовником','Роль у студентському проєкті'];
+const START_HROBS = ['Легко формулює думки','Аргументує','Ставить питання','Бере відповідальність','Проявляє ініціативу','Потребує структури'];
+const START_FORMAT = [
+  {key:'solo_team', a:'Сам', b:'Команда'},
+  {key:'task_freedom', a:'Чітке завдання', b:'Свобода'},
+  {key:'stable_change', a:'Стабільність', b:'Зміни'},
+  {key:'role', a:'Виконавець', b:'Організатор'},
+  {key:'visibility', a:'Публічно', b:'За лаштунками'},
+  {key:'pace', a:'Швидкий темп', b:'Глибоке занурення'}
+];
+
 let state = {
   profile:{name:'', year:'', program:'', goal:''},
   cases:[],
   career:{steps:{}, notes:'', tests:[], resume:null, trials:[], internships:[]},
   clubs:{},
-  customClubs:[]
+  customClubs:[],
+  start:{
+    why:'', confidence:'',
+    experience:{}, experienceOther:'',
+    skills:{},
+    situational:{organized:'', solved:'', teamwork:'', mistake:''},
+    interests:{},
+    format:{},
+    hypotheses:['','',''],
+    toTest:{},
+    hrObs:{}, certainty:'',
+    semesterTask:''
+  }
 };
 
 async function loadState(){
@@ -400,6 +513,12 @@ async function loadState(){
       state.career.internships = (data.career && data.career.internships) || [];
       state.clubs = data.clubs || {};
       state.customClubs = data.customClubs || [];
+      state.start = Object.assign({
+        why:'', confidence:'', experience:{}, experienceOther:'', skills:{},
+        situational:{organized:'',solved:'',teamwork:'',mistake:''},
+        interests:{}, format:{}, hypotheses:['','',''], toTest:{}, hrObs:{}, certainty:'', semesterTask:''
+      }, data.start || {});
+      state.start.situational = Object.assign({organized:'',solved:'',teamwork:'',mistake:''}, state.start.situational||{});
     }
     const filesSnap = await filesCollectionRef().get();
     state.career.tests = [];
@@ -422,7 +541,8 @@ async function saveState(noteId){
       cases: state.cases,
       career: { steps: state.career.steps, notes: state.career.notes, trials: state.career.trials, internships: state.career.internships },
       clubs: state.clubs,
-      customClubs: state.customClubs
+      customClubs: state.customClubs,
+      start: state.start
     }, {merge:true});
     if(noteId){
       const el = document.getElementById(noteId);
@@ -439,6 +559,7 @@ async function saveState(noteId){
 
 function renderAll(){
   renderProfile();
+  renderStart();
   renderCases();
   renderCareer();
   renderClubs();
@@ -451,6 +572,50 @@ function renderProfile(){
   document.getElementById('p-program').value = state.profile.program || '';
   document.getElementById('p-goal').value = state.profile.goal || '';
   document.getElementById('header-year').textContent = state.profile.year ? ('рік вступу — '+state.profile.year) : 'рік вступу — не вказано';
+}
+
+function checkboxGroupHtml(containerId, options, stateObj){
+  return options.map((label,i)=>{
+    const checked = !!stateObj[i];
+    return '<div class="club-row">'
+      + '<input type="checkbox" data-group="'+containerId+'" data-idx="'+i+'" '+(checked?'checked':'')+'>'
+      + '<span class="club-name">'+escapeHtml(label)+'</span>'
+      + '</div>';
+  }).join('');
+}
+
+function renderStart(){
+  const s = state.start;
+  document.getElementById('start-why').value = s.why || '';
+  document.getElementById('start-confidence').value = s.confidence || '';
+  document.getElementById('start-experience-other').value = s.experienceOther || '';
+  document.getElementById('start-sit-organized').value = s.situational.organized || '';
+  document.getElementById('start-sit-solved').value = s.situational.solved || '';
+  document.getElementById('start-sit-teamwork').value = s.situational.teamwork || '';
+  document.getElementById('start-sit-mistake').value = s.situational.mistake || '';
+  document.getElementById('start-hyp-0').value = (s.hypotheses||[])[0] || '';
+  document.getElementById('start-hyp-1').value = (s.hypotheses||[])[1] || '';
+  document.getElementById('start-hyp-2').value = (s.hypotheses||[])[2] || '';
+  document.getElementById('start-certainty').value = s.certainty || '';
+  document.getElementById('start-semester-task').value = s.semesterTask || '';
+
+  document.getElementById('start-experience-list').innerHTML = checkboxGroupHtml('experience', START_EXPERIENCE, s.experience);
+  document.getElementById('start-skills-list').innerHTML = checkboxGroupHtml('skills', START_SKILLS, s.skills);
+  document.getElementById('start-interests-list').innerHTML = checkboxGroupHtml('interests', START_INTERESTS, s.interests);
+  document.getElementById('start-totest-list').innerHTML = checkboxGroupHtml('toTest', START_TOTEST, s.toTest);
+  document.getElementById('start-hrobs-list').innerHTML = checkboxGroupHtml('hrObs', START_HROBS, s.hrObs);
+
+  document.getElementById('start-format-list').innerHTML = START_FORMAT.map(f=>{
+    const val = s.format[f.key] || '';
+    return '<div class="row" style="align-items:center; margin-bottom:8px;">'
+      + '<div style="flex:0 0 140px; font-size:13px; opacity:0.7;">'+escapeHtml(f.a)+' / '+escapeHtml(f.b)+'</div>'
+      + '<div style="flex:1;"><select data-format-key="'+f.key+'">'
+        + '<option value="">Не визначено</option>'
+        + '<option value="'+escapeHtml(f.a)+'" '+(val===f.a?'selected':'')+'>'+escapeHtml(f.a)+'</option>'
+        + '<option value="'+escapeHtml(f.b)+'" '+(val===f.b?'selected':'')+'>'+escapeHtml(f.b)+'</option>'
+      + '</select></div>'
+      + '</div>';
+  }).join('');
 }
 
 function renderCases(){
@@ -607,6 +772,12 @@ function renderCustomClubs(){
 }
 
 function renderProgress(){
+  const goalBox = document.getElementById('personal-goal-box');
+  if(goalBox){
+    goalBox.innerHTML = state.start.semesterTask
+      ? '<div class="detail-block" style="margin-left:0;"><p style="margin:0; font-size:14.5px;"><strong>Твоя задача на семестр:</strong> '+escapeHtml(state.start.semesterTask)+'</p></div>'
+      : '<p class="hint" style="margin:0 0 10px;">Особиста задача на семестр ще не заповнена — додай її у вкладці "Старт".</p>';
+  }
   const box = document.getElementById('progress-metrics');
   const caseCount = state.cases.length;
   const caseGoal = 2;
@@ -668,6 +839,42 @@ document.querySelectorAll('.tab-btn').forEach((btn,i)=>{
 });
 document.querySelector('.tab-btn[data-tab="profile"]').classList.add('active');
 document.getElementById('tab-profile').classList.add('active');
+
+document.getElementById('tab-start').addEventListener('change', (e)=>{
+  const group = e.target.dataset.group;
+  if(group !== undefined){
+    const idx = e.target.dataset.idx;
+    state.start[group][idx] = e.target.checked;
+    saveState();
+    return;
+  }
+  const formatKey = e.target.dataset.formatKey;
+  if(formatKey){
+    state.start.format[formatKey] = e.target.value;
+    saveState();
+    return;
+  }
+});
+
+document.getElementById('save-start').addEventListener('click', ()=>{
+  const s = state.start;
+  s.why = document.getElementById('start-why').value;
+  s.confidence = document.getElementById('start-confidence').value;
+  s.experienceOther = document.getElementById('start-experience-other').value;
+  s.situational.organized = document.getElementById('start-sit-organized').value;
+  s.situational.solved = document.getElementById('start-sit-solved').value;
+  s.situational.teamwork = document.getElementById('start-sit-teamwork').value;
+  s.situational.mistake = document.getElementById('start-sit-mistake').value;
+  s.hypotheses = [
+    document.getElementById('start-hyp-0').value,
+    document.getElementById('start-hyp-1').value,
+    document.getElementById('start-hyp-2').value
+  ];
+  s.certainty = document.getElementById('start-certainty').value;
+  s.semesterTask = document.getElementById('start-semester-task').value;
+  renderProgress();
+  saveState('start-note');
+});
 
 document.getElementById('save-profile').addEventListener('click', ()=>{
   state.profile.name = document.getElementById('p-name').value;
