@@ -320,6 +320,18 @@
         <div id="clubs-list"></div>
         <div class="save-note" id="clubs-note"></div>
       </div>
+      <div class="card">
+        <h2 class="section-title">Інші спільноти</h2>
+        <p class="hint" style="margin-top:0;">Якщо береш участь у спільноті, якої немає у списку вище — додай її сама.</p>
+        <div class="row">
+          <div>
+            <label>Назва спільноти</label>
+            <input type="text" id="new-club-name" placeholder="Наприклад, Волонтерський штаб">
+          </div>
+        </div>
+        <button class="primary" id="add-club-btn" type="button" style="margin-top:10px;">+ Додати спільноту</button>
+        <div id="custom-clubs-list" style="margin-top:14px;"></div>
+      </div>
     </section>
 
     <section id="tab-progress">
@@ -371,7 +383,8 @@ let state = {
   profile:{name:'', year:'', program:'', goal:''},
   cases:[],
   career:{steps:{}, notes:'', tests:[], resume:null, trials:[], internships:[]},
-  clubs:{}
+  clubs:{},
+  customClubs:[]
 };
 
 async function loadState(){
@@ -386,6 +399,7 @@ async function loadState(){
       state.career.trials = (data.career && data.career.trials) || [];
       state.career.internships = (data.career && data.career.internships) || [];
       state.clubs = data.clubs || {};
+      state.customClubs = data.customClubs || [];
     }
     const filesSnap = await filesCollectionRef().get();
     state.career.tests = [];
@@ -407,7 +421,8 @@ async function saveState(noteId){
       profile: state.profile,
       cases: state.cases,
       career: { steps: state.career.steps, notes: state.career.notes, trials: state.career.trials, internships: state.career.internships },
-      clubs: state.clubs
+      clubs: state.clubs,
+      customClubs: state.customClubs
     }, {merge:true});
     if(noteId){
       const el = document.getElementById(noteId);
@@ -571,6 +586,24 @@ function renderClubs(){
       + '<span class="club-name">'+escapeHtml(club)+'</span>'
       + '</div>';
   }).join('');
+  renderCustomClubs();
+}
+
+function renderCustomClubs(){
+  const box = document.getElementById('custom-clubs-list');
+  if(!box) return;
+  const list = state.customClubs || [];
+  if(list.length === 0){
+    box.innerHTML = '<div class="empty" style="padding:12px 0;">Ще нічого не додано.</div>';
+    return;
+  }
+  box.innerHTML = list.slice().reverse().map(c=>{
+    return '<div class="club-row">'
+      + '<input type="checkbox" data-custom-club="'+c.id+'" '+(c.joined?'checked':'')+'>'
+      + '<span class="club-name">'+escapeHtml(c.name)+'</span>'
+      + '<button class="ghost danger" data-del-club="'+c.id+'">Видалити</button>'
+      + '</div>';
+  }).join('');
 }
 
 function renderProgress(){
@@ -580,7 +613,8 @@ function renderProgress(){
   const casePct = Math.min(100, Math.round(caseCount/caseGoal*100));
   const careerDone = Object.values(state.career.steps).filter(Boolean).length;
   const careerPct = Math.round(careerDone/CAREER_STEPS.length*100);
-  const clubCount = Object.values(state.clubs).filter(Boolean).length;
+  const customJoined = (state.customClubs||[]).filter(c=>c.joined).length;
+  const clubCount = Object.values(state.clubs).filter(Boolean).length + customJoined;
   const clubPct = Math.min(100, clubCount*100);
   const resumeReady = !!state.career.resume;
   const testCount = (state.career.tests||[]).length;
@@ -590,7 +624,7 @@ function renderProgress(){
 
   box.innerHTML = metricHtml('Кейси і проєкти', caseCount+' з '+caseGoal, Math.min(100, Math.round(caseCount/caseGoal*100)))
     + metricHtml('Кар\'єрний маршрут', careerDone+' з '+CAREER_STEPS.length+' кроків', careerPct)
-    + metricHtml('Участь у спільнотах', clubCount+' з 4 клубів', clubPct)
+    + metricHtml('Участь у спільнотах', clubCount+' спільнот(и)', clubPct)
     + metricHtml('Резюме', resumeReady ? 'завантажено' : 'ще немає', resumeReady ? 100 : 0)
     + metricHtml('Результати тестів', testCount+' тест(ів)', testCount > 0 ? 100 : 0)
     + metricHtml('Професійні проби', trialCount+' пройдено', trialCount > 0 ? 100 : 0)
@@ -788,6 +822,34 @@ document.getElementById('clubs-list').addEventListener('change', (e)=>{
   state.clubs[idx] = e.target.checked;
   renderProgress();
   saveState('clubs-note');
+});
+
+document.getElementById('add-club-btn').addEventListener('click', ()=>{
+  const input = document.getElementById('new-club-name');
+  const name = input.value.trim();
+  if(!name) return;
+  if(!state.customClubs) state.customClubs = [];
+  state.customClubs.push({ id: 'club-'+Date.now(), name: name, joined: true });
+  input.value = '';
+  renderCustomClubs();
+  renderProgress();
+  saveState();
+});
+
+document.getElementById('custom-clubs-list').addEventListener('change', (e)=>{
+  const id = e.target.dataset.customClub;
+  if(!id) return;
+  const c = (state.customClubs||[]).find(x=>x.id === id);
+  if(c){ c.joined = e.target.checked; renderProgress(); saveState(); }
+});
+
+document.getElementById('custom-clubs-list').addEventListener('click', (e)=>{
+  const id = e.target.dataset.delClub;
+  if(!id) return;
+  state.customClubs = (state.customClubs||[]).filter(x=>x.id !== id);
+  renderCustomClubs();
+  renderProgress();
+  saveState();
 });
 
 document.getElementById('add-test-btn').addEventListener('click', ()=>{
