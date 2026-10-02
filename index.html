@@ -158,6 +158,25 @@
   .toggle-form{margin-bottom:16px;}
   .hint{font-size:12.5px; opacity:0.6; margin-top:4px;}
 
+  .wallet-card{
+    max-width:440px; margin:40px auto; text-align:center; padding:40px 32px;
+    background:var(--paper-card); border:1px solid var(--line); border-radius:8px; position:relative;
+  }
+  .wallet-card::before{ content:""; position:absolute; top:0; left:0; right:0; height:3px; background:var(--brass); border-radius:8px 8px 0 0; }
+  .wallet-icon{
+    width:56px; height:56px; margin:0 auto 14px; border-radius:50%; background:rgba(232,114,12,0.12);
+    display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:600; color:var(--brass-dark);
+    font-family:'Montserrat', sans-serif;
+  }
+  .wallet-title{font-family:'Montserrat', sans-serif; font-weight:300; font-size:24px; letter-spacing:1px; margin:0 0 10px;}
+  .wallet-sub{font-size:13.5px; line-height:1.6; opacity:0.75; margin:0 0 24px;}
+  .wallet-btn{
+    display:inline-block; font-family:"Courier New", monospace; text-transform:uppercase; letter-spacing:0.6px;
+    font-size:13px; font-weight:700; background:var(--ink); color:var(--paper); text-decoration:none;
+    padding:12px 26px; border-radius:4px;
+  }
+  .wallet-btn:hover{background:#0e1530;}
+
   #code-gate{
     max-width:420px; margin:80px auto; text-align:center; padding:0 20px;
   }
@@ -168,7 +187,7 @@
   #logout-btn{position:fixed; top:14px; right:14px; z-index:50;}
 
   @media print{
-    .tabs, #save-pdf-btn, #photo-btn, #open-case-form, .case-actions, #case-form-card, #add-test-btn, #test-pdf-input, .file-row button, [data-add-entry], [data-del-entry], .curator-feedback textarea, .curator-feedback button{ display:none !important; }
+    .tabs, #save-pdf-btn, #photo-btn, #open-case-form, .case-actions, #case-form-card, #add-test-btn, #test-pdf-input, .file-row button, [data-add-entry], [data-del-entry], .curator-feedback textarea, .curator-feedback button, #tab-wallet{ display:none !important; }
     section{ display:block !important; page-break-inside:avoid; margin-bottom:20px; }
     body{ background:#fff; }
     input, textarea, select{ border:1px solid var(--line); background:#fff; }
@@ -212,6 +231,7 @@
     <button class="tab-btn" data-tab="cases">Кейси і проєкти</button>
     <button class="tab-btn" data-tab="career">Кар'єра</button>
     <button class="tab-btn" data-tab="clubs">Спільноти</button>
+    <button class="tab-btn" data-tab="wallet">Гаманець</button>
     <button class="tab-btn" data-tab="progress">Прогрес</button>
   </nav>
 
@@ -420,6 +440,16 @@
       </div>
     </section>
 
+    <section id="tab-wallet">
+      <div class="wallet-card">
+        <div class="wallet-icon">₴</div>
+        <h2 class="wallet-title">IPP Coin</h2>
+        <p class="wallet-sub">Твій особистий гаманець і рівень — бали за участь, кейси та активності, які можна обміняти на нагороди.</p>
+        <a class="wallet-btn" href="https://script.google.com/macros/s/AKfycbz_R8yqFjJ5kxW4ZT2QV2r6aKK8AkX9qNsvHfVwDvnRAZIrApPojwkpfdqtr9Zfi5uMhg/exec" target="_blank" rel="noopener">Відкрити гаманець →</a>
+        <p class="hint" style="margin-top:14px;">Відкриється в новій вкладці. Вхід у гаманець — за твоїм особистим кодом.</p>
+      </div>
+    </section>
+
     <section id="tab-progress">
       <div class="progress-grid" id="progress-metrics"></div>
       <div class="card">
@@ -496,7 +526,7 @@ let state = {
     hypotheses:['','',''],
     toTest:{},
     hrObs:{}, certainty:'',
-    semesterTask:''
+    semesterTask:'', goalHistory:[]
   }
 };
 
@@ -516,7 +546,7 @@ async function loadState(){
       state.start = Object.assign({
         why:'', confidence:'', experience:{}, experienceOther:'', skills:{},
         situational:{organized:'',solved:'',teamwork:'',mistake:''},
-        interests:{}, format:{}, hypotheses:['','',''], toTest:{}, hrObs:{}, certainty:'', semesterTask:''
+        interests:{}, format:{}, hypotheses:['','',''], toTest:{}, hrObs:{}, certainty:'', semesterTask:'', goalHistory:[]
       }, data.start || {});
       state.start.situational = Object.assign({organized:'',solved:'',teamwork:'',mistake:''}, state.start.situational||{});
     }
@@ -774,9 +804,18 @@ function renderCustomClubs(){
 function renderProgress(){
   const goalBox = document.getElementById('personal-goal-box');
   if(goalBox){
-    goalBox.innerHTML = state.start.semesterTask
+    const current = state.start.semesterTask
       ? '<div class="detail-block" style="margin-left:0;"><p style="margin:0; font-size:14.5px;"><strong>Твоя задача на семестр:</strong> '+escapeHtml(state.start.semesterTask)+'</p></div>'
       : '<p class="hint" style="margin:0 0 10px;">Особиста задача на семестр ще не заповнена — додай її у вкладці "Старт".</p>';
+    const history = (state.start.goalHistory||[]);
+    const historyHtml = history.length > 1
+      ? '<div style="margin-top:10px;"><p class="hint" style="margin:0 0 6px;">Історія змін цілі:</p>'
+        + history.slice(0, -1).slice().reverse().map(h=>
+            '<div class="file-row"><span class="file-date">'+escapeHtml(h.date)+'</span><span class="file-name">'+escapeHtml(h.task)+'</span></div>'
+          ).join('')
+        + '</div>'
+      : '';
+    goalBox.innerHTML = current + historyHtml;
   }
   const box = document.getElementById('progress-metrics');
   const caseCount = state.cases.length;
@@ -871,7 +910,12 @@ document.getElementById('save-start').addEventListener('click', ()=>{
     document.getElementById('start-hyp-2').value
   ];
   s.certainty = document.getElementById('start-certainty').value;
-  s.semesterTask = document.getElementById('start-semester-task').value;
+  const newTask = document.getElementById('start-semester-task').value;
+  if(newTask.trim() && newTask.trim() !== (s.semesterTask||'').trim()){
+    if(!s.goalHistory) s.goalHistory = [];
+    s.goalHistory.push({ task: newTask.trim(), date: new Date().toLocaleDateString('uk-UA') });
+  }
+  s.semesterTask = newTask;
   renderProgress();
   saveState('start-note');
 });
