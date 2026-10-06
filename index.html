@@ -17,6 +17,8 @@
     --brass-dark:#B85A09;
     --sage:#7FA341;
     --coral:#B14E33;
+    --curator:#5B4B8A;
+    --curator-soft:rgba(91,75,138,0.08);
     --line: rgba(28,37,65,0.14);
     --line-strong: rgba(28,37,65,0.28);
     font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
@@ -186,7 +188,51 @@
   #code-gate .gate-note{color:var(--coral); font-size:13px; margin-top:10px; min-height:18px;}
   #logout-btn{position:fixed; top:14px; right:14px; z-index:50;}
 
+  /* ===== вкладка Старт: сесії ===== */
+  .session-bar{display:flex; align-items:flex-end; gap:14px; padding:14px 16px; margin-bottom:12px; background:var(--paper-card); border:1px solid var(--line); border-radius:4px; flex-wrap:wrap;}
+  .session-bar label{margin:0 0 4px; font-size:10.5px;}
+  .session-bar select, .session-bar input[type=date]{padding:7px 9px; font-size:13px; font-family:inherit; border:1px solid var(--line-strong); border-radius:3px; background:#fff; color:var(--ink);}
+  .curator-toggle{margin-left:auto; font-family:"Courier New",monospace; font-size:12px; text-transform:uppercase; letter-spacing:0.5px; background:none; border:1px solid var(--curator); color:var(--curator); padding:9px 14px; border-radius:4px; cursor:pointer;}
+  .curator-toggle.on{background:var(--curator); color:#fff;}
+  .curator-gate{display:flex; align-items:center; gap:10px; margin-bottom:12px; flex-wrap:wrap;}
+  .curator-gate input{flex:0 1 240px; padding:8px 10px; font-size:14px; font-family:inherit; border:1px solid var(--curator); border-radius:3px; background:#fff;}
+  .curator-banner{display:none; background:var(--curator); color:#fff; font-size:12.5px; padding:10px 16px; text-align:center; letter-spacing:0.3px; margin-bottom:12px; border-radius:4px;}
+  .curator-banner.show{display:block;}
+  .curator-card{background:var(--curator-soft);}
+  .curator-card::before{background:var(--curator);}
+  .curator-card label{color:var(--curator);}
+  .curator-card button.primary{background:var(--curator);}
+  .curator-tag{display:inline-block; font-size:10px; text-transform:uppercase; letter-spacing:0.5px; background:var(--curator); color:#fff; padding:2px 8px; border-radius:9px; margin-left:8px; vertical-align:middle; font-family:'Montserrat',sans-serif;}
+  .section-meta{font-size:11px; opacity:0.5; margin:-8px 0 14px; font-family:"Courier New",monospace;}
+  .check-row{display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--line);}
+  .check-row:last-child{border-bottom:none;}
+  .check-row input[type=checkbox], .check-row input[type=radio]{width:auto; flex:0 0 auto;}
+  .check-row span{flex:1; font-size:13.5px;}
+  .check-row .inline-input{display:inline-block; padding:2px 6px; font-size:13px;}
+  .add-row{display:flex; gap:8px; margin-top:10px;}
+  .add-row input{flex:1;}
+  .entry-grid{display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:6px;}
+  .entry-grid input{font-size:12.5px; padding:6px 8px;}
+  .entry-grid .lbl{font-size:9.5px; text-transform:uppercase; opacity:0.5; display:block; margin-bottom:2px;}
+  .pair-row{display:flex; align-items:center; gap:12px; padding:7px 0; border-bottom:1px solid var(--line);}
+  .pair-row:last-child{border-bottom:none;}
+  .pair-row .labels{flex:0 0 220px; font-size:12.5px; opacity:0.75;}
+  .pair-row select{flex:1;}
+  .table-scroll{overflow-x:auto;}
+  table.score-table{width:100%; border-collapse:collapse; font-size:12.5px;}
+  table.score-table th{text-align:left; font-size:10px; text-transform:uppercase; opacity:0.55; padding:6px; border-bottom:1px solid var(--line-strong); white-space:nowrap;}
+  table.score-table td{padding:6px; border-bottom:1px solid var(--line); vertical-align:top;}
+  table.score-table input[type=number]{width:56px; padding:4px 6px;}
+  table.score-table input[type=text]{padding:5px 6px;}
+  @media (max-width:640px){
+    .entry-grid{grid-template-columns:1fr 1fr;}
+    .pair-row{flex-wrap:wrap;}
+    .pair-row .labels{flex:1 0 100%;}
+    .curator-toggle{margin-left:0;}
+  }
+
   @media print{
+    #curator-toggle, #curator-gate, #curator-banner, #progress-card, #softskills-card, #intake-fields, #checkin-fields, #new-session-btn, #session-select, .session-bar, #empty-state{ display:none !important; }
     .tabs, #save-pdf-btn, #photo-btn, #open-case-form, .case-actions, #case-form-card, #add-test-btn, #test-pdf-input, .file-row button, [data-add-entry], [data-del-entry], .curator-feedback textarea, .curator-feedback button, #tab-wallet{ display:none !important; }
     section{ display:block !important; page-break-inside:avoid; margin-bottom:20px; }
     body{ background:#fff; }
@@ -263,87 +309,169 @@
     </section>
 
     <section id="tab-start">
-      <div class="card">
-        <h2 class="section-title">Стартова точка</h2>
-        <p class="hint" style="margin-top:0;">Заповнюється на початку навчання — куратором разом зі студентом, за 20 хвилин.</p>
-        <label>Чому обрав(ла) цю спеціальність?</label>
-        <textarea id="start-why" placeholder="Коротко, своїми словами"></textarea>
-        <label>Наскільки впевнений(а) у виборі (1–10)</label>
-        <input type="number" id="start-confidence" min="1" max="10" style="max-width:100px;">
+      <div class="session-bar">
+        <div><label>Сесія</label><select id="session-select"></select></div>
+        <div><label>Дата</label><input type="date" id="top-session-date"></div>
+        <button class="primary" id="new-session-btn" type="button">+ Нова сесія</button>
+        <button class="curator-toggle" id="curator-toggle" type="button">Режим куратора: вимкнено</button>
+      </div>
+      <div class="curator-gate" id="curator-gate" style="display:none;">
+        <input type="password" id="curator-code-input" placeholder="Код куратора" autocomplete="off">
+        <button class="primary" id="curator-code-btn" type="button">Увійти</button>
+        <span class="save-note" id="curator-code-note"></span>
+      </div>
+      <div class="curator-banner" id="curator-banner">Режим куратора увімкнено — видно блоки, яких студент не бачить</div>
+      <div class="save-note" id="ss-note"></div>
+
+      <div id="empty-state" class="card" style="text-align:center; padding:40px 20px;">
+        <h2 class="section-title" style="margin-bottom:8px;">Ще немає жодної сесії</h2>
+        <p class="hint" style="margin:0;">Усі дані — досвід, навички, цілі й нотатки куратора — належать конкретній сесії. Щоб почати, обери "Перша сесія" зверху і натисни "+ Нова сесія".</p>
       </div>
 
-      <div class="card">
-        <h2 class="section-title">Досвід</h2>
-        <p class="hint" style="margin-top:0;">Що вже реально робив(ла) — оберіть усе, що підходить.</p>
-        <div id="start-experience-list"></div>
-        <label>Інше</label>
-        <input type="text" id="start-experience-other" placeholder="Щось, чого немає у списку">
+      <div id="sessions-list"></div>
+
+      <div id="session-view" style="display:none;">
+
+        <div class="card" id="view-banner" style="display:none; text-align:center;">
+          <p style="margin:0; font-size:13px;">Перегляд збереженої сесії — редагування недоступне. Щоб додати нові дані, створи наступну сесію.</p>
+        </div>
+
+        <div class="card">
+          <h2 class="section-title">Досвід</h2>
+          <p class="section-meta">мінімум 2 рядки</p>
+          <div id="experience-list"></div>
+          <button class="ghost" id="add-experience-btn" type="button" style="margin-top:8px;">+ Додати досвід</button>
+          <label style="margin-top:16px;">Додатково фіксуємо</label>
+          <div class="check-row"><input type="checkbox" data-extra="formal"><span>Формальні / виборні ролі (староста, президент школи, капітан, лідер гуртка)</span></div>
+          <div class="check-row"><input type="checkbox" data-extra="hobby"><span>Довгі захоплення, років: <input type="text" id="extra-hobby-years" class="inline-input" style="width:60px;"></span></div>
+          <div class="check-row"><input type="checkbox" data-extra="jobsearch"><span>Шукав(ла) роботу, не знайшов(ла). Причина: <input type="text" id="extra-jobsearch-reason" class="inline-input" style="width:160px;"></span></div>
+          <div class="check-row"><input type="checkbox" data-extra="activeproj"><span>Є активні / сезонні проєкти, які можуть конфліктувати з навчанням</span></div>
+          <div class="check-row"><input type="checkbox" data-extra="network"><span>Соціальний капітал: є мережа, через яку знаходиш можливості</span></div>
+        </div>
+
+        <div class="card">
+          <h2 class="section-title">Що вмієш робити</h2>
+          <p class="section-meta">галочка — лише якщо був приклад</p>
+          <div id="skills-list"></div>
+          <div class="add-row">
+            <input type="text" id="new-skill-input" placeholder="Додати свою навичку">
+            <button class="ghost" id="add-skill-btn" type="button">+ Додати</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="section-title">Енергія: що заряджає і що виснажує</h2>
+          <div class="row">
+            <div>
+              <label>Заряджає</label>
+              <div id="energize-list"></div>
+              <div class="add-row"><input type="text" id="new-energize-input" placeholder="Додати своє"><button class="ghost" id="add-energize-btn" type="button">+</button></div>
+            </div>
+            <div>
+              <label>Виснажує</label>
+              <div id="drain-list"></div>
+              <div class="add-row"><input type="text" id="new-drain-input" placeholder="Додати своє"><button class="ghost" id="add-drain-btn" type="button">+</button></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="section-title">Робочий формат</h2>
+          <p class="section-meta">від 1 до 5: до якого полюса ближче</p>
+          <div id="format-list"></div>
+        </div>
+
+        <div class="card">
+          <h2 class="section-title">Тиск і автономія</h2>
+          <label>Що з тобою відбувається, коли відповідальність за результат лежить саме на тобі? Що робиш далі?</label>
+          <textarea id="pressure-q1"></textarea>
+          <label>Коли ти вирішив(ла) щось сам(а), навіть якщо оточення було проти?</label>
+          <textarea id="pressure-q2"></textarea>
+        </div>
+
+        <div class="card">
+          <h2 class="section-title">Професійні гіпотези</h2>
+          <div class="check-row"><input type="radio" name="hyp-status" data-hyp-status="have"><span>Уже є професія / сфера, яка цікавить</span></div>
+          <div class="check-row"><input type="radio" name="hyp-status" data-hyp-status="few"><span>Є 2–3 варіанти</span></div>
+          <div class="check-row"><input type="radio" name="hyp-status" data-hyp-status="none"><span>Поки не знаю</span></div>
+          <label>Гіпотеза 1</label><input type="text" id="hyp-0">
+          <label>Гіпотеза 2</label><input type="text" id="hyp-1">
+          <label>Гіпотеза 3</label><input type="text" id="hyp-2">
+          <label>Яку одну професійну задачу ти зараз уникаєш, але розумієш, що доведеться навчитися?</label>
+          <textarea id="hyp-avoid"></textarea>
+        </div>
+
+        <div class="card">
+          <h2 class="section-title">Ціль на 6 місяців</h2>
+          <p class="section-meta">з'являється у розділі "Прогрес"</p>
+          <label>Чого хочеш навчитися або в якій ролі себе спробувати до кінця семестру?</label>
+          <textarea id="goal-learn"></textarea>
+          <label>Як через пів року зрозуміємо, що вийшло?</label>
+          <textarea id="goal-measure"></textarea>
+          <label>Тип перевірки</label>
+          <div class="check-row"><input type="checkbox" data-goal-type="trial"><span>Професійна проба</span></div>
+          <div class="check-row"><input type="checkbox" data-goal-type="project"><span>Проєкт</span></div>
+          <div class="check-row"><input type="checkbox" data-goal-type="internship"><span>Стажування</span></div>
+          <div class="check-row"><input type="checkbox" data-goal-type="volunteer"><span>Волонтерство</span></div>
+          <div class="check-row"><input type="checkbox" data-goal-type="client"><span>Реальний замовник</span></div>
+          <div class="check-row"><input type="checkbox" data-goal-type="teamrole"><span>Роль у студентському проєкті</span></div>
+        </div>
+
+        <div class="card curator-card" id="intake-fields" style="display:none;">
+          <h2 class="section-title">Стартова точка і STAR-історії <span class="curator-tag">куратор</span></h2>
+          <label>Чому обрав(ла) спеціальність? Які варіанти розглядав(ла)?</label><textarea id="sp-why"></textarea>
+          <label>Наскільки впевнений(а) у виборі, 1–10? Що лякає?</label><textarea id="sp-confidence"></textarea>
+          <label>Що для тебе важливо в роботі? Навіщо?</label><textarea id="sp-important"></textarea>
+          <label>STAR 1 — найскладніший проєкт</label><textarea id="star-1"></textarea>
+          <label>STAR 2 — хаос, який розрулив(ла)</label><textarea id="star-2"></textarea>
+          <label>STAR 3 — коли план не спрацював</label><textarea id="star-3"></textarea>
+          <label>STAR 4 — найдорожча помилка, що б зробив(ла) інакше</label><textarea id="star-4"></textarea>
+          <label>STAR 5 — робота з людиною, яка дратувала</label><textarea id="star-5"></textarea>
+          <label>Релевантна позиція зараз</label>
+          <input type="text" id="position-title" placeholder="Позиція (entry-level)">
+          <textarea id="position-rationale" placeholder="Обґрунтування: факт з інтерв'ю" style="margin-top:8px;"></textarea>
+          <label>DISC (гіпотеза)</label>
+          <input type="text" id="disc-type" placeholder="Напр., D / I">
+          <label>Метапрограми — коротко</label>
+          <textarea id="metaprograms"></textarea>
+          <label>HR-спостереження</label>
+          <textarea id="hr-obs"></textarea>
+          <label>Суперечності — перевірити наступного разу</label>
+          <textarea id="contradictions"></textarea>
+          <label>Підсумок профілю</label>
+          <textarea id="summary"></textarea>
+        </div>
+
+        <div class="card curator-card" id="checkin-fields" style="display:none;">
+          <h2 class="section-title">Семестровий чек-ін <span class="curator-tag">куратор</span></h2>
+          <label>Що змінилося за семестр?</label><textarea id="ci-change"></textarea>
+          <label>Що з цілі вдалося? Що ні і чому?</label><textarea id="ci-goal-result"></textarea>
+          <label>Які нові ролі, проєкти брав(ла)?</label><textarea id="ci-newroles"></textarea>
+          <label>Результати (цифри, продукт, відгук)</label><textarea id="ci-results"></textarea>
+          <label>Перевірені / відкинуті гіпотези</label><textarea id="ci-hyp"></textarea>
+          <label>Суперечності з попередньої сесії — підтвердились?</label><textarea id="ci-contradictions"></textarea>
+          <label>Рядок у резюме: роль — дія — результат</label><input type="text" id="ci-resume">
+          <label>Нова ціль + результат + дедлайн</label><textarea id="ci-newgoal"></textarea>
+          <label>DISC / метапрограми</label>
+          <select id="ci-disc-status"><option>Підтверджено</option><option>Переглянуто</option></select>
+        </div>
+
+        <div class="card curator-card" id="softskills-card" style="display:none;">
+          <h2 class="section-title">Soft skills — оцінка цієї сесії <span class="curator-tag">куратор</span></h2>
+          <p class="section-meta">0 — немає даних · 1 — декларує без прикладу · 2 — приклад з підтримкою · 3 — самостійний приклад · 4 — системно / навчає інших</p>
+          <div class="table-scroll"><table class="score-table" id="session-softskills-table"></table></div>
+        </div>
+
+        <div style="margin:16px 0; display:flex; gap:10px;">
+          <button class="primary" id="save-session-btn" type="button">Зберегти сесію</button>
+          <button class="ghost" id="cancel-session-btn" type="button">Закрити</button>
+        </div>
       </div>
 
-      <div class="card">
-        <h2 class="section-title">Що вміє робити</h2>
-        <p class="hint" style="margin-top:0;">Конкретні дії, а не риси характеру.</p>
-        <div id="start-skills-list"></div>
-      </div>
-
-      <div class="card">
-        <h2 class="section-title">Ситуаційний досвід</h2>
-        <label>Розкажи про ситуацію, коли ти сам(а) щось організував(ла)</label>
-        <textarea id="start-sit-organized"></textarea>
-        <label>Коли вирішував(ла) проблему</label>
-        <textarea id="start-sit-solved"></textarea>
-        <label>Коли працював(ла) з іншими</label>
-        <textarea id="start-sit-teamwork"></textarea>
-        <label>Коли не впорався / помилився(лась)</label>
-        <textarea id="start-sit-mistake"></textarea>
-      </div>
-
-      <div class="card">
-        <h2 class="section-title">Що подобається</h2>
-        <p class="hint" style="margin-top:0;">Тип задач, а не назва професії.</p>
-        <div id="start-interests-list"></div>
-      </div>
-
-      <div class="card">
-        <h2 class="section-title">Робочий формат</h2>
-        <p class="hint" style="margin-top:0;">В яких умовах ти сильніший(а).</p>
-        <div id="start-format-list"></div>
-      </div>
-
-      <div class="card">
-        <h2 class="section-title">Професійні гіпотези</h2>
-        <p class="hint" style="margin-top:0;">Не «ким хочу бути», а що варто перевірити цього року — 2–3 напрями.</p>
-        <label>Гіпотеза 1</label>
-        <input type="text" id="start-hyp-0" placeholder="Наприклад, проєктний менеджмент">
-        <label>Гіпотеза 2</label>
-        <input type="text" id="start-hyp-1" placeholder="Наприклад, маркетинг">
-        <label>Гіпотеза 3</label>
-        <input type="text" id="start-hyp-2" placeholder="Необов'язково">
-      </div>
-
-      <div class="card">
-        <h2 class="section-title">Що перевірити цього року</h2>
-        <div id="start-totest-list"></div>
-      </div>
-
-      <div class="card">
-        <h2 class="section-title">Спостереження куратора</h2>
-        <div id="start-hrobs-list"></div>
-        <label>Рівень професійної визначеності</label>
-        <select id="start-certainty">
-          <option value="">Не визначено</option>
-          <option value="Висока">Висока</option>
-          <option value="Середня">Середня</option>
-          <option value="Низька">Низька</option>
-        </select>
-      </div>
-
-      <div class="card">
-        <h2 class="section-title">Професійна задача на семестр</h2>
-        <p class="hint" style="margin-top:0;">Це і стане особистою ціллю студента — вона з'явиться у розділі "Прогрес".</p>
-        <textarea id="start-semester-task" placeholder="Наприклад: перевірити себе в ролі координатора реального проєкту"></textarea>
-        <button class="primary" id="save-start" style="margin-top:16px;">Зберегти стартовий профіль</button>
-        <div class="save-note" id="start-note"></div>
+      <div class="card curator-card" id="progress-card" style="display:none;">
+        <h2 class="section-title">Прогрес по soft skills <span class="curator-tag">куратор</span></h2>
+        <p class="section-meta">збирається автоматично з усіх збережених сесій</p>
+        <div class="table-scroll" id="progress-table-wrap"></div>
       </div>
     </section>
 
@@ -496,43 +624,25 @@ const CAREER_STEPS = [
 ];
 const CLUBS = ['Дебатний клуб','Кіноклуб','Книжковий клуб','Театральна студія'];
 
-const START_EXPERIENCE = ['Робота / підробіток','Волонтерство','Шкільні проєкти','Власні ініціативи','Організація заходів','Конкурси / олімпіади','Блог / соцмережі / контент'];
-const START_SKILLS = ['Організувати','Домовитися','Презентувати','Аналізувати інформацію','Писати тексти','Працювати з цифрами','Створювати контент','Працювати з людьми','Вести команду','Працювати самостійно','Використовувати AI'];
-const START_INTERESTS = ['Люди','Ідеї','Дані / цифри','Організація','Творчість','Дослідження','Продажі / переговори','Допомога людям','Технології','Управління'];
-const START_TOTEST = ['Професійна проба','Проєкт','Стажування','Волонтерство','Робота з реальним замовником','Роль у студентському проєкті'];
-const START_HROBS = ['Легко формулює думки','Аргументує','Ставить питання','Бере відповідальність','Проявляє ініціативу','Потребує структури'];
-const START_FORMAT = [
-  {key:'solo_team', a:'Сам', b:'Команда'},
-  {key:'task_freedom', a:'Чітке завдання', b:'Свобода'},
-  {key:'stable_change', a:'Стабільність', b:'Зміни'},
-  {key:'role', a:'Виконавець', b:'Організатор'},
-  {key:'visibility', a:'Публічно', b:'За лаштунками'},
-  {key:'pace', a:'Швидкий темп', b:'Глибоке занурення'}
-];
-
-let state = {
-  profile:{name:'', year:'', program:'', goal:''},
-  cases:[],
-  career:{steps:{}, notes:'', tests:[], resume:null, trials:[], internships:[]},
-  clubs:{},
-  customClubs:[],
-  start:{
-    why:'', confidence:'',
-    experience:{}, experienceOther:'',
-    skills:{},
-    situational:{organized:'', solved:'', teamwork:'', mistake:''},
-    interests:{},
-    format:{},
-    hypotheses:['','',''],
-    toTest:{},
-    hrObs:{}, certainty:'',
-    semesterTask:'', goalHistory:[]
-  }
-};
+function freshState(){
+  return {
+    profile:{name:'', year:'', program:'', goal:''},
+    cases:[],
+    career:{steps:{}, notes:'', tests:[], resume:null, trials:[], internships:[]},
+    clubs:{},
+    customClubs:[],
+    sessions:[],
+    startCustom:{skills:[], energize:[], drain:[]}
+  };
+}
+let state = freshState();
+function resetState(){ state = freshState(); }
 
 async function loadState(){
+  const codeAtStart = studentCode;
   try{
     const doc = await portfolioDocRef().get();
+    if(codeAtStart !== studentCode) return;
     if(doc.exists){
       const data = doc.data();
       state.profile = data.profile || state.profile;
@@ -543,14 +653,12 @@ async function loadState(){
       state.career.internships = (data.career && data.career.internships) || [];
       state.clubs = data.clubs || {};
       state.customClubs = data.customClubs || [];
-      state.start = Object.assign({
-        why:'', confidence:'', experience:{}, experienceOther:'', skills:{},
-        situational:{organized:'',solved:'',teamwork:'',mistake:''},
-        interests:{}, format:{}, hypotheses:['','',''], toTest:{}, hrObs:{}, certainty:'', semesterTask:'', goalHistory:[]
-      }, data.start || {});
-      state.start.situational = Object.assign({organized:'',solved:'',teamwork:'',mistake:''}, state.start.situational||{});
+      state.sessions = Array.isArray(data.sessions) ? data.sessions : [];
+      const sc = data.startCustom || {};
+      state.startCustom = { skills: sc.skills || [], energize: sc.energize || [], drain: sc.drain || [] };
     }
     const filesSnap = await filesCollectionRef().get();
+    if(codeAtStart !== studentCode) return;
     state.career.tests = [];
     state.career.resume = null;
     filesSnap.forEach(d=>{
@@ -561,7 +669,9 @@ async function loadState(){
   }catch(e){
     console.log('Не вдалося завантажити портфоліо', e);
   }
+  if(codeAtStart !== studentCode) return;
   renderAll();
+  ssSelectNextUnfilled();
 }
 
 async function saveState(noteId){
@@ -572,7 +682,8 @@ async function saveState(noteId){
       career: { steps: state.career.steps, notes: state.career.notes, trials: state.career.trials, internships: state.career.internships },
       clubs: state.clubs,
       customClubs: state.customClubs,
-      start: state.start
+      sessions: state.sessions,
+      startCustom: state.startCustom
     }, {merge:true});
     if(noteId){
       const el = document.getElementById(noteId);
@@ -589,7 +700,7 @@ async function saveState(noteId){
 
 function renderAll(){
   renderProfile();
-  renderStart();
+  renderSessionsUI();
   renderCases();
   renderCareer();
   renderClubs();
@@ -602,50 +713,6 @@ function renderProfile(){
   document.getElementById('p-program').value = state.profile.program || '';
   document.getElementById('p-goal').value = state.profile.goal || '';
   document.getElementById('header-year').textContent = state.profile.year ? ('рік вступу — '+state.profile.year) : 'рік вступу — не вказано';
-}
-
-function checkboxGroupHtml(containerId, options, stateObj){
-  return options.map((label,i)=>{
-    const checked = !!stateObj[i];
-    return '<div class="club-row">'
-      + '<input type="checkbox" data-group="'+containerId+'" data-idx="'+i+'" '+(checked?'checked':'')+'>'
-      + '<span class="club-name">'+escapeHtml(label)+'</span>'
-      + '</div>';
-  }).join('');
-}
-
-function renderStart(){
-  const s = state.start;
-  document.getElementById('start-why').value = s.why || '';
-  document.getElementById('start-confidence').value = s.confidence || '';
-  document.getElementById('start-experience-other').value = s.experienceOther || '';
-  document.getElementById('start-sit-organized').value = s.situational.organized || '';
-  document.getElementById('start-sit-solved').value = s.situational.solved || '';
-  document.getElementById('start-sit-teamwork').value = s.situational.teamwork || '';
-  document.getElementById('start-sit-mistake').value = s.situational.mistake || '';
-  document.getElementById('start-hyp-0').value = (s.hypotheses||[])[0] || '';
-  document.getElementById('start-hyp-1').value = (s.hypotheses||[])[1] || '';
-  document.getElementById('start-hyp-2').value = (s.hypotheses||[])[2] || '';
-  document.getElementById('start-certainty').value = s.certainty || '';
-  document.getElementById('start-semester-task').value = s.semesterTask || '';
-
-  document.getElementById('start-experience-list').innerHTML = checkboxGroupHtml('experience', START_EXPERIENCE, s.experience);
-  document.getElementById('start-skills-list').innerHTML = checkboxGroupHtml('skills', START_SKILLS, s.skills);
-  document.getElementById('start-interests-list').innerHTML = checkboxGroupHtml('interests', START_INTERESTS, s.interests);
-  document.getElementById('start-totest-list').innerHTML = checkboxGroupHtml('toTest', START_TOTEST, s.toTest);
-  document.getElementById('start-hrobs-list').innerHTML = checkboxGroupHtml('hrObs', START_HROBS, s.hrObs);
-
-  document.getElementById('start-format-list').innerHTML = START_FORMAT.map(f=>{
-    const val = s.format[f.key] || '';
-    return '<div class="row" style="align-items:center; margin-bottom:8px;">'
-      + '<div style="flex:0 0 140px; font-size:13px; opacity:0.7;">'+escapeHtml(f.a)+' / '+escapeHtml(f.b)+'</div>'
-      + '<div style="flex:1;"><select data-format-key="'+f.key+'">'
-        + '<option value="">Не визначено</option>'
-        + '<option value="'+escapeHtml(f.a)+'" '+(val===f.a?'selected':'')+'>'+escapeHtml(f.a)+'</option>'
-        + '<option value="'+escapeHtml(f.b)+'" '+(val===f.b?'selected':'')+'>'+escapeHtml(f.b)+'</option>'
-      + '</select></div>'
-      + '</div>';
-  }).join('');
 }
 
 function renderCases(){
@@ -804,18 +871,25 @@ function renderCustomClubs(){
 function renderProgress(){
   const goalBox = document.getElementById('personal-goal-box');
   if(goalBox){
-    const current = state.start.semesterTask
-      ? '<div class="detail-block" style="margin-left:0;"><p style="margin:0; font-size:14.5px;"><strong>Твоя задача на семестр:</strong> '+escapeHtml(state.start.semesterTask)+'</p></div>'
-      : '<p class="hint" style="margin:0 0 10px;">Особиста задача на семестр ще не заповнена — додай її у вкладці "Старт".</p>';
-    const history = (state.start.goalHistory||[]);
-    const historyHtml = history.length > 1
-      ? '<div style="margin-top:10px;"><p class="hint" style="margin:0 0 6px;">Історія змін цілі:</p>'
-        + history.slice(0, -1).slice().reverse().map(h=>
-            '<div class="file-row"><span class="file-date">'+escapeHtml(h.date)+'</span><span class="file-name">'+escapeHtml(h.task)+'</span></div>'
-          ).join('')
-        + '</div>'
-      : '';
-    goalBox.innerHTML = current + historyHtml;
+    const withGoal = (state.sessions || []).filter(s=> s.goal && s.goal.learn && s.goal.learn.trim())
+      .sort((a,b)=> a.number - b.number);
+    const last = withGoal[withGoal.length - 1];
+    let goalHtml;
+    if(last){
+      goalHtml = '<div class="detail-block" style="margin-left:0;"><p style="margin:0; font-size:14.5px;"><strong>Твоя ціль ('
+        + escapeHtml(ssName(last.number)) + (last.date ? ', ' + escapeHtml(last.date) : '') + '):</strong> ' + escapeHtml(last.goal.learn) + '</p>'
+        + (last.goal.measure ? '<p style="margin:8px 0 0; font-size:13px; opacity:0.75;">Як зрозуміємо, що вийшло: ' + escapeHtml(last.goal.measure) + '</p>' : '')
+        + '</div>';
+      const prev = withGoal.slice(0, -1).reverse();
+      if(prev.length){
+        goalHtml += '<div style="margin-top:10px;"><p class="hint" style="margin:0 0 6px;">Попередні цілі:</p>'
+          + prev.map(s=> '<div class="file-row"><span class="file-date">' + escapeHtml(s.date || '') + '</span><span class="file-name">' + escapeHtml(s.goal.learn) + '</span></div>').join('')
+          + '</div>';
+      }
+    } else {
+      goalHtml = '<p class="hint" style="margin:0 0 10px;">Ціль на 6 місяців з\'явиться тут після першої збереженої сесії у вкладці "Старт".</p>';
+    }
+    goalBox.innerHTML = goalHtml;
   }
   const box = document.getElementById('progress-metrics');
   const caseCount = state.cases.length;
@@ -878,47 +952,6 @@ document.querySelectorAll('.tab-btn').forEach((btn,i)=>{
 });
 document.querySelector('.tab-btn[data-tab="profile"]').classList.add('active');
 document.getElementById('tab-profile').classList.add('active');
-
-document.getElementById('tab-start').addEventListener('change', (e)=>{
-  const group = e.target.dataset.group;
-  if(group !== undefined){
-    const idx = e.target.dataset.idx;
-    state.start[group][idx] = e.target.checked;
-    saveState();
-    return;
-  }
-  const formatKey = e.target.dataset.formatKey;
-  if(formatKey){
-    state.start.format[formatKey] = e.target.value;
-    saveState();
-    return;
-  }
-});
-
-document.getElementById('save-start').addEventListener('click', ()=>{
-  const s = state.start;
-  s.why = document.getElementById('start-why').value;
-  s.confidence = document.getElementById('start-confidence').value;
-  s.experienceOther = document.getElementById('start-experience-other').value;
-  s.situational.organized = document.getElementById('start-sit-organized').value;
-  s.situational.solved = document.getElementById('start-sit-solved').value;
-  s.situational.teamwork = document.getElementById('start-sit-teamwork').value;
-  s.situational.mistake = document.getElementById('start-sit-mistake').value;
-  s.hypotheses = [
-    document.getElementById('start-hyp-0').value,
-    document.getElementById('start-hyp-1').value,
-    document.getElementById('start-hyp-2').value
-  ];
-  s.certainty = document.getElementById('start-certainty').value;
-  const newTask = document.getElementById('start-semester-task').value;
-  if(newTask.trim() && newTask.trim() !== (s.semesterTask||'').trim()){
-    if(!s.goalHistory) s.goalHistory = [];
-    s.goalHistory.push({ task: newTask.trim(), date: new Date().toLocaleDateString('uk-UA') });
-  }
-  s.semesterTask = newTask;
-  renderProgress();
-  saveState('start-note');
-});
 
 document.getElementById('save-profile').addEventListener('click', ()=>{
   state.profile.name = document.getElementById('p-name').value;
@@ -1177,6 +1210,366 @@ document.getElementById('save-pdf-btn').addEventListener('click', ()=>{
   window.print();
 });
 
+/* ===== СЕСІЇ (вкладка Старт) ===== */
+const CURATOR_CODE = 'куратор987654321';
+const SESSION_ORDINALS = ['Перша','Друга','Третя','Четверта',"П'ята",'Шоста','Сьома'];
+const COMPETENCIES = ['Комунікація','Командна взаємодія','Лідерство / вплив','Ініціативність','Відповідальність і рефлексія','Вирішення проблем','Навчуваність','Самоорганізація','Стресостійкість','Бізнес-мислення'];
+const EXPERIENCE_FIELDS = [
+  {key:'role', label:'Роль'}, {key:'scale', label:'Масштаб у цифрах'}, {key:'with', label:'З ким'},
+  {key:'result', label:'Результат'}, {key:'ended', label:'Чому завершився'}
+];
+const BASE_SKILLS = ['Організувати','Домовитися / вести переговори','Продавати, шукати клієнтів','Рахувати економіку, ціни, витрати','Презентувати','Аналізувати інформацію','Писати тексти','Працювати з цифрами','Створювати контент','Працювати з людьми','Вести команду','Працювати самостійно','Використовувати AI'];
+const BASE_ENERGIZE = ['Люди','Ідеї','Дані / цифри','Організація','Творчість','Дослідження','Продажі / переговори','Допомога людям','Технології','Управління'];
+const BASE_DRAIN = ['Монотонна робота','Письмова / документальна робота',"Робота за комп'ютером довго",'Робота без людей','Хаос без структури','Публічність'];
+const FORMAT_PAIRS = [
+  ['Сам','Команда'], ['Чітке завдання','Свобода'], ['Стабільність','Зміни'],
+  ['Виконавець','Організатор'], ['За лаштунками','Публічно'], ['Глибоке занурення','Швидкий темп'],
+  ['Онлайн','Вживу'], ['Енергія від самоти','Енергія від людей']
+];
+const SS_TEXT_IDS = ['pressure-q1','pressure-q2','hyp-0','hyp-1','hyp-2','hyp-avoid','goal-learn','goal-measure','extra-hobby-years','extra-jobsearch-reason','sp-why','sp-confidence','sp-important','star-1','star-2','star-3','star-4','star-5','position-title','position-rationale','disc-type','metaprograms','hr-obs','contradictions','summary','ci-change','ci-goal-result','ci-newroles','ci-results','ci-hyp','ci-contradictions','ci-resume','ci-newgoal'];
+
+let curatorOn = false;
+let sessionMode = 'none';      // 'none' | 'new' | 'view'
+let activeSessionNumber = 1;
+
+function ssEl(id){ return document.getElementById(id); }
+function ssTodayLocal(){
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function ssName(n){ return (SESSION_ORDINALS[n-1] || n) + ' сесія'; }
+
+/* ---- списки з галочками (навички, енергія) ---- */
+function ssOptions(listKey){
+  const base = {skills:BASE_SKILLS, energize:BASE_ENERGIZE, drain:BASE_DRAIN}[listKey];
+  return base.concat((state.startCustom && state.startCustom[listKey]) || []);
+}
+function ssChecklistHtml(attr, options, checked){
+  return options.map(function(label){
+    return '<div class="check-row"><input type="checkbox" '+attr+'="'+escapeHtml(label)+'" '+(checked.indexOf(label) > -1 ? 'checked' : '')+'><span>'+escapeHtml(label)+'</span></div>';
+  }).join('');
+}
+function ssChecked(attr){
+  return Array.from(document.querySelectorAll('['+attr+']:checked')).map(function(el){ return el.getAttribute(attr); });
+}
+function ssRenderLists(sel){
+  sel = sel || {};
+  ssEl('skills-list').innerHTML = ssChecklistHtml('data-ss-skills', ssOptions('skills'), sel.skills || []);
+  ssEl('energize-list').innerHTML = ssChecklistHtml('data-ss-energize', ssOptions('energize'), sel.energize || []);
+  ssEl('drain-list').innerHTML = ssChecklistHtml('data-ss-drain', ssOptions('drain'), sel.drain || []);
+}
+function ssAddCustom(listKey, inputId){
+  const input = ssEl(inputId);
+  const val = input.value.trim();
+  if(!val) return;
+  const exists = ssOptions(listKey).some(function(x){ return x.toLowerCase() === val.toLowerCase(); });
+  if(!exists){
+    const cur = {skills: ssChecked('data-ss-skills'), energize: ssChecked('data-ss-energize'), drain: ssChecked('data-ss-drain')};
+    if(!state.startCustom[listKey]) state.startCustom[listKey] = [];
+    state.startCustom[listKey].push(val);
+    ssRenderLists(cur);
+    saveState('ss-note');
+  }
+  input.value = '';
+}
+
+/* ---- досвід ---- */
+function ssAddExperienceRow(v){
+  v = v || {};
+  ssEl('experience-list').insertAdjacentHTML('beforeend',
+    '<div class="entry-item experience-row"><div class="entry-grid">' + EXPERIENCE_FIELDS.map(function(f){
+      return '<div><span class="lbl">'+f.label+'</span><input type="text" data-exp="'+f.key+'" value="'+escapeHtml(v[f.key] || '')+'"></div>';
+    }).join('') + '</div></div>');
+}
+
+/* ---- робочий формат ---- */
+function ssRenderFormat(saved){
+  saved = saved || [];
+  ssEl('format-list').innerHTML = FORMAT_PAIRS.map(function(p){
+    const key = p[0]+'|'+p[1];
+    const found = saved.find(function(x){ return x.k === key; });
+    const val = found ? found.v : '';
+    return '<div class="pair-row"><div class="labels">'+escapeHtml(p[0])+' ↔ '+escapeHtml(p[1])+'</div><select data-ss-format="'+escapeHtml(key)+'">'
+      + ['','1','2','3','4','5'].map(function(v){ return '<option value="'+v+'" '+(v === val ? 'selected' : '')+'>'+(v || '—')+'</option>'; }).join('')
+      + '</select></div>';
+  }).join('');
+}
+
+/* ---- soft skills ---- */
+function ssRenderSoftskills(saved){
+  saved = saved || [];
+  ssEl('session-softskills-table').innerHTML = '<tr><th>Компетенція</th><th>Бал (0–4)</th><th>Доказ / цитата</th></tr>'
+    + COMPETENCIES.map(function(c){
+      const f = saved.find(function(x){ return x.c === c; });
+      const score = (f && f.score !== null && f.score !== undefined) ? f.score : '';
+      const ev = f ? (f.evidence || '') : '';
+      return '<tr><td>'+escapeHtml(c)+'</td><td><input type="number" min="0" max="4" data-ss-score="'+escapeHtml(c)+'" value="'+score+'"></td><td><input type="text" data-ss-evidence="'+escapeHtml(c)+'" value="'+escapeHtml(ev)+'"></td></tr>';
+    }).join('');
+}
+
+/* ---- форма: очистити / зібрати / заповнити ---- */
+function ssClearForm(){
+  ssEl('experience-list').innerHTML = '';
+  ssAddExperienceRow(); ssAddExperienceRow();
+  ssRenderLists(); ssRenderFormat(); ssRenderSoftskills();
+  SS_TEXT_IDS.forEach(function(id){ ssEl(id).value = ''; });
+  document.querySelectorAll('[data-extra],[data-hyp-status],[data-goal-type]').forEach(function(el){ el.checked = false; });
+  ssEl('ci-disc-status').value = 'Підтверджено';
+}
+
+function ssCollect(){
+  const g = function(id){ return ssEl(id).value; };
+  const chk = function(k){ return document.querySelector('[data-extra="'+k+'"]').checked; };
+  const hyp = document.querySelector('[data-hyp-status]:checked');
+  const scoreInputs = Array.from(document.querySelectorAll('[data-ss-score]'));
+  const evidenceInputs = Array.from(document.querySelectorAll('[data-ss-evidence]'));
+  return {
+    experience: Array.from(document.querySelectorAll('.experience-row')).map(function(row){
+      const o = {};
+      row.querySelectorAll('[data-exp]').forEach(function(i){ o[i.getAttribute('data-exp')] = i.value; });
+      return o;
+    }).filter(function(o){ return Object.keys(o).some(function(k){ return String(o[k]).trim(); }); }),
+    skills: ssChecked('data-ss-skills'),
+    energize: ssChecked('data-ss-energize'),
+    drain: ssChecked('data-ss-drain'),
+    format: Array.from(document.querySelectorAll('[data-ss-format]')).filter(function(el){ return el.value; }).map(function(el){
+      return {k: el.getAttribute('data-ss-format'), v: el.value};
+    }),
+    softskills: scoreInputs.map(function(inp){
+      const c = inp.getAttribute('data-ss-score');
+      const evEl = evidenceInputs.find(function(x){ return x.getAttribute('data-ss-evidence') === c; });
+      let score = null;
+      if(inp.value !== '' && !isNaN(Number(inp.value))){ score = Math.max(0, Math.min(4, Number(inp.value))); }
+      return {c: c, score: score, evidence: evEl ? evEl.value : ''};
+    }),
+    extra: {
+      formal: chk('formal'), hobby: chk('hobby'), hobbyYears: g('extra-hobby-years'),
+      jobsearch: chk('jobsearch'), jobsearchReason: g('extra-jobsearch-reason'),
+      activeproj: chk('activeproj'), network: chk('network')
+    },
+    pressure: {q1: g('pressure-q1'), q2: g('pressure-q2')},
+    hypotheses: {status: hyp ? hyp.getAttribute('data-hyp-status') : '', h0: g('hyp-0'), h1: g('hyp-1'), h2: g('hyp-2'), avoid: g('hyp-avoid')},
+    goal: {
+      learn: g('goal-learn'), measure: g('goal-measure'),
+      types: Array.from(document.querySelectorAll('[data-goal-type]:checked')).map(function(el){ return el.getAttribute('data-goal-type'); })
+    },
+    intake: {
+      why: g('sp-why'), confidence: g('sp-confidence'), important: g('sp-important'),
+      star: [1,2,3,4,5].map(function(i){ return g('star-'+i); }),
+      positionTitle: g('position-title'), positionRationale: g('position-rationale'),
+      disc: g('disc-type'), metaprograms: g('metaprograms'),
+      hrObs: g('hr-obs'), contradictions: g('contradictions'), summary: g('summary')
+    },
+    checkin: {
+      change: g('ci-change'), goalResult: g('ci-goal-result'), newRoles: g('ci-newroles'), results: g('ci-results'),
+      hyp: g('ci-hyp'), contradictions: g('ci-contradictions'), resume: g('ci-resume'), newGoal: g('ci-newgoal'),
+      discStatus: g('ci-disc-status')
+    }
+  };
+}
+
+function ssFill(s){
+  const ex = s.extra || {}, pr = s.pressure || {}, hy = s.hypotheses || {}, go = s.goal || {}, it = s.intake || {}, ci = s.checkin || {};
+  const star = it.star || [];
+  ssEl('experience-list').innerHTML = '';
+  (s.experience && s.experience.length ? s.experience : [{}]).forEach(function(r){ ssAddExperienceRow(r); });
+  ssRenderLists({skills: s.skills || [], energize: s.energize || [], drain: s.drain || []});
+  ssRenderFormat(s.format);
+  ssRenderSoftskills(s.softskills);
+  ['formal','hobby','jobsearch','activeproj','network'].forEach(function(k){
+    document.querySelector('[data-extra="'+k+'"]').checked = !!ex[k];
+  });
+  document.querySelectorAll('[data-hyp-status]').forEach(function(el){ el.checked = el.getAttribute('data-hyp-status') === hy.status; });
+  document.querySelectorAll('[data-goal-type]').forEach(function(el){ el.checked = (go.types || []).indexOf(el.getAttribute('data-goal-type')) > -1; });
+  const text = {
+    'extra-hobby-years': ex.hobbyYears, 'extra-jobsearch-reason': ex.jobsearchReason,
+    'pressure-q1': pr.q1, 'pressure-q2': pr.q2,
+    'hyp-0': hy.h0, 'hyp-1': hy.h1, 'hyp-2': hy.h2, 'hyp-avoid': hy.avoid,
+    'goal-learn': go.learn, 'goal-measure': go.measure,
+    'sp-why': it.why, 'sp-confidence': it.confidence, 'sp-important': it.important,
+    'star-1': star[0], 'star-2': star[1], 'star-3': star[2], 'star-4': star[3], 'star-5': star[4],
+    'position-title': it.positionTitle, 'position-rationale': it.positionRationale,
+    'disc-type': it.disc, 'metaprograms': it.metaprograms, 'hr-obs': it.hrObs, 'contradictions': it.contradictions, 'summary': it.summary,
+    'ci-change': ci.change, 'ci-goal-result': ci.goalResult, 'ci-newroles': ci.newRoles, 'ci-results': ci.results,
+    'ci-hyp': ci.hyp, 'ci-contradictions': ci.contradictions, 'ci-resume': ci.resume, 'ci-newgoal': ci.newGoal
+  };
+  Object.keys(text).forEach(function(id){ ssEl(id).value = text[id] || ''; });
+  ssEl('ci-disc-status').value = ci.discStatus || 'Підтверджено';
+}
+
+function ssSetDisabled(disabled){
+  document.querySelectorAll('#session-view input, #session-view textarea, #session-view select, #session-view button').forEach(function(el){
+    if(el.id === 'cancel-session-btn') return;
+    el.disabled = disabled;
+  });
+  ssEl('save-session-btn').style.display = disabled ? 'none' : 'inline-block';
+  ssEl('view-banner').style.display = disabled ? 'block' : 'none';
+  ssEl('top-session-date').disabled = disabled;
+}
+
+/* ---- режим куратора ---- */
+function ssApplyCurator(){
+  const inSession = sessionMode !== 'none';
+  const show = function(id, cond){ ssEl(id).style.display = cond ? 'block' : 'none'; };
+  show('progress-card', curatorOn);
+  show('softskills-card', curatorOn && inSession);
+  show('intake-fields', curatorOn && inSession && activeSessionNumber === 1);
+  show('checkin-fields', curatorOn && inSession && activeSessionNumber !== 1);
+  ssEl('curator-banner').classList.toggle('show', curatorOn);
+  const t = ssEl('curator-toggle');
+  t.classList.toggle('on', curatorOn);
+  t.textContent = curatorOn ? 'Режим куратора: увімкнено' : 'Режим куратора: вимкнено';
+}
+function ssTryCurator(){
+  const val = ssEl('curator-code-input').value.trim().toLowerCase();
+  const note = ssEl('curator-code-note');
+  if(val === CURATOR_CODE.toLowerCase()){
+    curatorOn = true;
+    ssEl('curator-gate').style.display = 'none';
+    ssEl('curator-code-input').value = '';
+    note.textContent = '';
+    ssApplyCurator();
+  } else {
+    note.style.color = 'var(--coral)';
+    note.textContent = 'Невірний код';
+  }
+}
+
+/* ---- відображення списку, вибору, прогресу ---- */
+function ssRenderList(){
+  const box = ssEl('sessions-list');
+  if(!state.sessions.length){ box.innerHTML = ''; return; }
+  box.innerHTML = '<div class="card"><h2 class="section-title">Збережені сесії</h2>'
+    + state.sessions.slice().sort(function(a,b){ return a.number - b.number; }).map(function(s){
+      return '<div class="check-row"><span>'+escapeHtml(ssName(s.number))+' · '+escapeHtml(s.date || '')+'</span><button class="ghost" data-ss-view="'+s.number+'">Переглянути</button></div>';
+    }).join('') + '</div>';
+}
+function ssRenderSelect(){
+  const sel = ssEl('session-select');
+  const prev = sel.value;
+  sel.innerHTML = SESSION_ORDINALS.map(function(name, i){
+    const n = i + 1;
+    const saved = state.sessions.find(function(s){ return s.number === n; });
+    return '<option value="'+n+'">'+name+' сесія'+(saved ? ' — заповнено ('+escapeHtml(saved.date || '')+')' : '')+'</option>';
+  }).join('');
+  sel.value = prev || '1';
+}
+function ssSelectNextUnfilled(){
+  for(let i = 1; i <= SESSION_ORDINALS.length; i++){
+    if(!state.sessions.find(function(s){ return s.number === i; })){ ssEl('session-select').value = String(i); return; }
+  }
+}
+function ssRenderProgress(){
+  const wrap = ssEl('progress-table-wrap');
+  if(!state.sessions.length){
+    wrap.innerHTML = '<p class="hint" style="margin:0;">З\'явиться після першої збереженої сесії.</p>';
+    return;
+  }
+  const ordered = state.sessions.slice().sort(function(a,b){ return a.number - b.number; });
+  let html = '<table class="score-table"><tr><th>Компетенція</th>'
+    + ordered.map(function(s){ return '<th>'+escapeHtml(ssName(s.number))+'<br>'+escapeHtml(s.date || '')+'</th>'; }).join('') + '</tr>';
+  COMPETENCIES.forEach(function(c){
+    html += '<tr><td>'+escapeHtml(c)+'</td>' + ordered.map(function(s){
+      const f = (s.softskills || []).find(function(x){ return x.c === c; });
+      return '<td>'+((f && f.score !== null && f.score !== undefined) ? f.score : '—')+'</td>';
+    }).join('') + '</tr>';
+  });
+  wrap.innerHTML = html + '</table>';
+}
+function renderSessionsUI(){
+  ssRenderList();
+  ssRenderSelect();
+  ssRenderProgress();
+  ssEl('empty-state').style.display = (state.sessions.length === 0 && sessionMode === 'none') ? 'block' : 'none';
+  ssApplyCurator();
+}
+
+/* ---- скидання інтерфейсу (вхід / вихід) ---- */
+function ssReset(){
+  curatorOn = false; sessionMode = 'none'; activeSessionNumber = 1;
+  ssEl('session-view').style.display = 'none';
+  ssEl('curator-gate').style.display = 'none';
+  ssEl('curator-code-input').value = '';
+  ssEl('curator-code-note').textContent = '';
+  ssEl('top-session-date').value = '';
+  ssEl('top-session-date').disabled = false;
+  ssEl('ss-note').textContent = '';
+  ssApplyCurator();
+}
+
+/* ---- дії ---- */
+function ssOpenNew(){
+  activeSessionNumber = Number(ssEl('session-select').value) || 1;
+  sessionMode = 'new';
+  const dateInput = ssEl('top-session-date');
+  dateInput.disabled = false;
+  if(!dateInput.value) dateInput.value = ssTodayLocal();
+  ssEl('empty-state').style.display = 'none';
+  ssEl('session-view').style.display = 'block';
+  ssClearForm();
+  ssSetDisabled(false);
+  ssApplyCurator();
+}
+function ssView(num){
+  const s = state.sessions.find(function(x){ return x.number === num; });
+  if(!s) return;
+  sessionMode = 'view';
+  activeSessionNumber = num;
+  ssEl('empty-state').style.display = 'none';
+  ssEl('session-view').style.display = 'block';
+  ssFill(s);
+  ssSetDisabled(true);
+  ssEl('top-session-date').value = s.date || '';
+  ssApplyCurator();
+}
+function ssSave(){
+  const existing = state.sessions.find(function(s){ return s.number === activeSessionNumber; });
+  if(existing && !confirm(ssName(activeSessionNumber)+' вже збережена ('+existing.date+'). Перезаписати її?')) return;
+  const date = ssEl('top-session-date').value || ssTodayLocal();
+  const data = ssCollect();
+  state.sessions = state.sessions.filter(function(s){ return s.number !== activeSessionNumber; });
+  state.sessions.push(Object.assign({id: 's-'+Date.now(), number: activeSessionNumber, date: date}, data));
+  state.sessions.sort(function(a,b){ return a.number - b.number; });
+  sessionMode = 'none';
+  ssEl('top-session-date').value = '';
+  ssEl('top-session-date').disabled = false;
+  ssEl('session-view').style.display = 'none';
+  renderSessionsUI();
+  ssSelectNextUnfilled();
+  renderProgress();
+  saveState('ss-note');
+}
+function ssClose(){
+  sessionMode = 'none';
+  ssEl('session-view').style.display = 'none';
+  ssEl('top-session-date').disabled = false;
+  ssEl('top-session-date').value = '';
+  renderSessionsUI();
+}
+
+ssEl('new-session-btn').addEventListener('click', ssOpenNew);
+ssEl('save-session-btn').addEventListener('click', ssSave);
+ssEl('cancel-session-btn').addEventListener('click', ssClose);
+ssEl('sessions-list').addEventListener('click', function(e){
+  const n = e.target.getAttribute('data-ss-view');
+  if(n) ssView(Number(n));
+});
+ssEl('add-experience-btn').addEventListener('click', function(){ ssAddExperienceRow(); });
+ssEl('add-skill-btn').addEventListener('click', function(){ ssAddCustom('skills', 'new-skill-input'); });
+ssEl('add-energize-btn').addEventListener('click', function(){ ssAddCustom('energize', 'new-energize-input'); });
+ssEl('add-drain-btn').addEventListener('click', function(){ ssAddCustom('drain', 'new-drain-input'); });
+ssEl('curator-toggle').addEventListener('click', function(){
+  if(curatorOn){ curatorOn = false; ssApplyCurator(); return; }
+  const gate = ssEl('curator-gate');
+  const opening = gate.style.display === 'none';
+  gate.style.display = opening ? 'flex' : 'none';
+  if(opening) ssEl('curator-code-input').focus();
+});
+ssEl('curator-code-btn').addEventListener('click', ssTryCurator);
+ssEl('curator-code-input').addEventListener('keydown', function(e){ if(e.key === 'Enter') ssTryCurator(); });
+ssReset();
+
+
 function showApp(){
   document.getElementById('code-gate').style.display = 'none';
   document.getElementById('main-app').style.display = 'block';
@@ -1195,6 +1588,7 @@ async function enterWithCode(code){
   studentCode = clean;
   gateNote.textContent = '';
   try{ localStorage.setItem('portfolio-student-code', clean); }catch(e){}
+  resetState(); ssReset(); renderAll();
   showApp();
   await loadState();
 }
@@ -1208,6 +1602,8 @@ document.getElementById('student-code-input').addEventListener('keydown', (e)=>{
 document.getElementById('logout-btn').addEventListener('click', ()=>{
   try{ localStorage.removeItem('portfolio-student-code'); }catch(e){}
   studentCode = '';
+  resetState(); ssReset(); renderAll();
+  document.getElementById('student-code-input').value = '';
   showGate();
 });
 
