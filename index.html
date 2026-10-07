@@ -231,6 +231,43 @@
     .curator-toggle{margin-left:0;}
   }
 
+  /* ===== правки за відгуком: пояснення, шкала, DISC ===== */
+  .help-box{background:rgba(232,114,12,0.07); border-left:2px solid var(--brass); border-radius:0 4px 4px 0; padding:10px 14px; font-size:12.5px; line-height:1.6; margin:0 0 14px;}
+  .help-box span{display:block; margin-top:4px; opacity:0.75;}
+  .scale-row{display:grid; grid-template-columns:minmax(90px,1fr) auto minmax(90px,1fr); gap:14px; align-items:center; padding:10px 0; border-bottom:1px solid var(--line);}
+  .scale-row:last-child{border-bottom:none;}
+  .scale-end{font-size:13px;}
+  .scale-left{text-align:right;}
+  .scale-dots{display:flex; gap:10px;}
+  .dot-opt{position:relative; width:28px; height:28px; display:inline-block;}
+  .dot-opt input{position:absolute; top:0; left:0; right:0; bottom:0; width:100%; height:100%; margin:0; opacity:0; cursor:pointer;}
+  .dot-opt .dot{position:absolute; top:0; left:0; right:0; bottom:0; border:2px solid var(--line-strong); border-radius:50%; background:#fff; pointer-events:none; transition:background .12s, border-color .12s;}
+  .dot-opt:hover .dot{border-color:var(--brass);}
+  .dot-opt input:checked + .dot{background:var(--brass); border-color:var(--brass); box-shadow:inset 0 0 0 4px #fff;}
+  .dot-opt input:focus-visible + .dot{outline:2px solid var(--curator); outline-offset:2px;}
+  .dot-opt input:disabled{cursor:default;}
+  .disc-grid{display:grid; grid-template-columns:1fr 1fr; gap:6px; max-width:380px; margin-top:6px;}
+  .disc-cell{position:relative; border:3px solid transparent; border-radius:8px; padding:14px 12px; text-align:left; cursor:pointer; font-family:inherit; color:var(--ink); display:flex; flex-direction:column; gap:3px; min-height:80px;}
+  .disc-cell b{font-size:26px; font-weight:600; line-height:1;}
+  .disc-cell small{font-size:11px; opacity:0.85;}
+  .disc-cell:disabled{cursor:default; color:var(--ink);}
+  .disc-d{background:#EBB4AC;} .disc-i{background:#F6DD86;}
+  .disc-s{background:#BFDDB1;} .disc-c{background:#B3D0EC;}
+  .disc-d.main{background:#C1402E; color:#fff;} .disc-i.main{background:#EBB719; color:#2a2200;}
+  .disc-s.main{background:#5E9B48; color:#fff;} .disc-c.main{background:#3E7CB8; color:#fff;}
+  .disc-d.second{border-color:#C1402E;} .disc-i.second{border-color:#EBB719;}
+  .disc-s.second{border-color:#5E9B48;} .disc-c.second{border-color:#3E7CB8;}
+  .disc-cell.main::after, .disc-cell.second::after{position:absolute; top:8px; right:10px; font-size:9.5px; text-transform:uppercase; letter-spacing:0.5px;}
+  .disc-cell.main::after{content:'основний';}
+  .disc-cell.second::after{content:'додатковий';}
+  .soft-x{border:none; background:none; color:var(--coral); cursor:pointer; font-size:16px; padding:0 4px; vertical-align:middle;}
+  @media (max-width:640px){
+    .scale-row{grid-template-columns:1fr 1fr; grid-template-areas:"l r" "d d"; row-gap:8px;}
+    .scale-left{grid-area:l; text-align:left;}
+    .scale-right{grid-area:r; text-align:right;}
+    .scale-dots{grid-area:d; justify-content:center;}
+  }
+
   @media print{
     #curator-toggle, #curator-gate, #curator-banner, #progress-card, #softskills-card, #intake-fields, #checkin-fields, #new-session-btn, #session-select, .session-bar, #empty-state{ display:none !important; }
     .tabs, #save-pdf-btn, #photo-btn, #open-case-form, .case-actions, #case-form-card, #add-test-btn, #test-pdf-input, .file-row button, [data-add-entry], [data-del-entry], .curator-feedback textarea, .curator-feedback button, #tab-wallet{ display:none !important; }
@@ -339,6 +376,10 @@
         <div class="card">
           <h2 class="section-title">Досвід</h2>
           <p class="section-meta">мінімум 2 рядки</p>
+          <div class="help-box" id="exp-help">
+            <b>Як заповнювати.</b> <i>Роль</i> — що саме ти робив(ла). <i>Масштаб</i> — наскільки велике те, чим ти займався(лась): скільки людей, грошей, часу. <i>З ким</i> — хто був поруч: команда, клієнти, наставник. <i>Результат</i> — що в підсумку вийшло.
+            <span>Приклад: організатор турніру · 200 учасників, бюджет 15 000 грн · команда з 5 людей · зібрали 40 000 грн на благодійність.</span>
+          </div>
           <div id="experience-list"></div>
           <button class="ghost" id="add-experience-btn" type="button" style="margin-top:8px;">+ Додати досвід</button>
           <label style="margin-top:16px;">Додатково фіксуємо</label>
@@ -377,7 +418,7 @@
 
         <div class="card">
           <h2 class="section-title">Робочий формат</h2>
-          <p class="section-meta">від 1 до 5: до якого полюса ближче</p>
+          <p class="section-meta">познач кружечок ближче до того краю, який більше про тебе</p>
           <div id="format-list"></div>
         </div>
 
@@ -431,7 +472,14 @@
           <input type="text" id="position-title" placeholder="Позиція (entry-level)">
           <textarea id="position-rationale" placeholder="Обґрунтування: факт з інтерв'ю" style="margin-top:8px;"></textarea>
           <label>DISC (гіпотеза)</label>
-          <input type="text" id="disc-type" placeholder="Напр., D / I">
+          <input type="hidden" id="disc-type">
+          <div class="disc-grid" id="disc-grid">
+            <button type="button" class="disc-cell disc-d" data-disc="D"><b>D</b><small>Домінування</small></button>
+            <button type="button" class="disc-cell disc-i" data-disc="I"><b>I</b><small>Вплив</small></button>
+            <button type="button" class="disc-cell disc-c" data-disc="C"><b>C</b><small>Ретельність</small></button>
+            <button type="button" class="disc-cell disc-s" data-disc="S"><b>S</b><small>Стабільність</small></button>
+          </div>
+          <p class="hint">Перший клік — основний тип, другий — додатковий. Клік по вибраному знімає вибір.</p>
           <label>Метапрограми — коротко</label>
           <textarea id="metaprograms"></textarea>
           <label>HR-спостереження</label>
@@ -460,6 +508,11 @@
           <h2 class="section-title">Soft skills — оцінка цієї сесії <span class="curator-tag">куратор</span></h2>
           <p class="section-meta">0 — немає даних · 1 — декларує без прикладу · 2 — приклад з підтримкою · 3 — самостійний приклад · 4 — системно / навчає інших</p>
           <div class="table-scroll"><table class="score-table" id="session-softskills-table"></table></div>
+          <div class="add-row">
+            <input type="text" id="new-softskill-input" placeholder="Додати власну компетенцію (напр. Креативність)">
+            <button class="ghost" id="add-softskill-btn" type="button">+ Додати</button>
+          </div>
+          <p class="hint">Нова компетенція з'явиться в усіх наступних сесіях цього студента й у таблиці прогресу. Попередні лишаються — їх теж оцінюємо.</p>
         </div>
 
         <div style="margin:16px 0; display:flex; gap:10px;">
@@ -632,7 +685,7 @@ function freshState(){
     clubs:{},
     customClubs:[],
     sessions:[],
-    startCustom:{skills:[], energize:[], drain:[]}
+    startCustom:{skills:[], energize:[], drain:[], softskills:[]}
   };
 }
 let state = freshState();
@@ -655,7 +708,7 @@ async function loadState(){
       state.customClubs = data.customClubs || [];
       state.sessions = Array.isArray(data.sessions) ? data.sessions : [];
       const sc = data.startCustom || {};
-      state.startCustom = { skills: sc.skills || [], energize: sc.energize || [], drain: sc.drain || [] };
+      state.startCustom = { skills: sc.skills || [], energize: sc.energize || [], drain: sc.drain || [], softskills: sc.softskills || [] };
     }
     const filesSnap = await filesCollectionRef().get();
     if(codeAtStart !== studentCode) return;
@@ -1215,8 +1268,11 @@ const CURATOR_CODE = 'куратор987654321';
 const SESSION_ORDINALS = ['Перша','Друга','Третя','Четверта',"П'ята",'Шоста','Сьома'];
 const COMPETENCIES = ['Комунікація','Командна взаємодія','Лідерство / вплив','Ініціативність','Відповідальність і рефлексія','Вирішення проблем','Навчуваність','Самоорганізація','Стресостійкість','Бізнес-мислення'];
 const EXPERIENCE_FIELDS = [
-  {key:'role', label:'Роль'}, {key:'scale', label:'Масштаб у цифрах'}, {key:'with', label:'З ким'},
-  {key:'result', label:'Результат'}, {key:'ended', label:'Чому завершився'}
+  {key:'role', label:'Роль', ph:'напр. організатор турніру'},
+  {key:'scale', label:'Масштаб у цифрах', ph:'напр. 200 учасників, 15 000 грн'},
+  {key:'with', label:'З ким працював(ла)', ph:'напр. команда з 5 людей'},
+  {key:'result', label:'Результат', ph:'напр. зібрали 40 000 грн'},
+  {key:'ended', label:'Чому завершився', ph:'напр. за планом / не вистачило часу'}
 ];
 const BASE_SKILLS = ['Організувати','Домовитися / вести переговори','Продавати, шукати клієнтів','Рахувати економіку, ціни, витрати','Презентувати','Аналізувати інформацію','Писати тексти','Працювати з цифрами','Створювати контент','Працювати з людьми','Вести команду','Працювати самостійно','Використовувати AI'];
 const BASE_ENERGIZE = ['Люди','Ідеї','Дані / цифри','Організація','Творчість','Дослідження','Продажі / переговори','Допомога людям','Технології','Управління'];
@@ -1278,33 +1334,92 @@ function ssAddExperienceRow(v){
   v = v || {};
   ssEl('experience-list').insertAdjacentHTML('beforeend',
     '<div class="entry-item experience-row"><div class="entry-grid">' + EXPERIENCE_FIELDS.map(function(f){
-      return '<div><span class="lbl">'+f.label+'</span><input type="text" data-exp="'+f.key+'" value="'+escapeHtml(v[f.key] || '')+'"></div>';
+      return '<div><span class="lbl">'+f.label+'</span><input type="text" data-exp="'+f.key+'" placeholder="'+escapeHtml(f.ph || '')+'" value="'+escapeHtml(v[f.key] || '')+'"></div>';
     }).join('') + '</div></div>');
 }
 
 /* ---- робочий формат ---- */
 function ssRenderFormat(saved){
   saved = saved || [];
-  ssEl('format-list').innerHTML = FORMAT_PAIRS.map(function(p){
+  ssEl('format-list').innerHTML = FORMAT_PAIRS.map(function(p, i){
     const key = p[0]+'|'+p[1];
     const found = saved.find(function(x){ return x.k === key; });
-    const val = found ? found.v : '';
-    return '<div class="pair-row"><div class="labels">'+escapeHtml(p[0])+' ↔ '+escapeHtml(p[1])+'</div><select data-ss-format="'+escapeHtml(key)+'">'
-      + ['','1','2','3','4','5'].map(function(v){ return '<option value="'+v+'" '+(v === val ? 'selected' : '')+'>'+(v || '—')+'</option>'; }).join('')
-      + '</select></div>';
+    const val = found ? String(found.v) : '';
+    const dots = ['1','2','3','4','5'].map(function(v){
+      return '<span class="dot-opt"><input type="radio" name="fmt-'+i+'" value="'+v+'" '+(v === val ? 'checked' : '')+'><span class="dot"></span></span>';
+    }).join('');
+    return '<div class="scale-row"><span class="scale-end scale-left">'+escapeHtml(p[0])+'</span>'
+      + '<div class="scale-dots" role="radiogroup" aria-label="'+escapeHtml(p[0]+' — '+p[1])+'">'+dots+'</div>'
+      + '<span class="scale-end scale-right">'+escapeHtml(p[1])+'</span>'
+      + '<input type="hidden" data-ss-format="'+escapeHtml(key)+'" value="'+escapeHtml(val)+'"></div>';
   }).join('');
 }
 
 /* ---- soft skills ---- */
+function ssCompetencies(){
+  return COMPETENCIES.concat((state.startCustom && state.startCustom.softskills) || []);
+}
+function ssSoftskillUsed(name){
+  return state.sessions.some(function(s){
+    return (s.softskills || []).some(function(x){
+      return x.c === name && ((x.score !== null && x.score !== undefined) || (x.evidence && String(x.evidence).trim()));
+    });
+  });
+}
+function ssReadSoftskills(){
+  const scoreInputs = Array.from(document.querySelectorAll('[data-ss-score]'));
+  const evidenceInputs = Array.from(document.querySelectorAll('[data-ss-evidence]'));
+  return scoreInputs.map(function(inp){
+    const c = inp.getAttribute('data-ss-score');
+    const evEl = evidenceInputs.find(function(x){ return x.getAttribute('data-ss-evidence') === c; });
+    return {c: c, score: inp.value === '' ? null : Number(inp.value), evidence: evEl ? evEl.value : ''};
+  });
+}
 function ssRenderSoftskills(saved){
   saved = saved || [];
+  const custom = (state.startCustom && state.startCustom.softskills) || [];
   ssEl('session-softskills-table').innerHTML = '<tr><th>Компетенція</th><th>Бал (0–4)</th><th>Доказ / цитата</th></tr>'
-    + COMPETENCIES.map(function(c){
+    + ssCompetencies().map(function(c){
       const f = saved.find(function(x){ return x.c === c; });
       const score = (f && f.score !== null && f.score !== undefined) ? f.score : '';
       const ev = f ? (f.evidence || '') : '';
-      return '<tr><td>'+escapeHtml(c)+'</td><td><input type="number" min="0" max="4" data-ss-score="'+escapeHtml(c)+'" value="'+score+'"></td><td><input type="text" data-ss-evidence="'+escapeHtml(c)+'" value="'+escapeHtml(ev)+'"></td></tr>';
+      const removable = sessionMode === 'new' && custom.indexOf(c) > -1 && !ssSoftskillUsed(c);
+      const name = escapeHtml(c) + (removable ? ' <button type="button" class="soft-x" data-ss-remove-soft="'+escapeHtml(c)+'" title="Прибрати компетенцію">×</button>' : '');
+      return '<tr><td>'+name+'</td><td><input type="number" min="0" max="4" data-ss-score="'+escapeHtml(c)+'" value="'+score+'"></td><td><input type="text" data-ss-evidence="'+escapeHtml(c)+'" value="'+escapeHtml(ev)+'"></td></tr>';
     }).join('');
+}
+function ssAddSoftskill(){
+  const input = ssEl('new-softskill-input');
+  const val = input.value.trim().slice(0, 60);
+  if(!val) return;
+  const exists = ssCompetencies().some(function(x){ return x.toLowerCase() === val.toLowerCase(); });
+  if(!exists){
+    const cur = ssReadSoftskills();
+    if(!state.startCustom.softskills) state.startCustom.softskills = [];
+    state.startCustom.softskills.push(val);
+    ssRenderSoftskills(cur);
+    ssRenderProgress();
+    saveState('ss-note');
+  }
+  input.value = '';
+}
+
+/* ---- DISC: кольоровий квадрант ---- */
+function ssDiscParse(v){
+  const out = [];
+  String(v || '').toUpperCase().split(/[\s\/,+\-]+/).forEach(function(t){
+    if(/^[DISC]$/.test(t) && out.indexOf(t) === -1) out.push(t);
+  });
+  return out.slice(0, 2);
+}
+function ssSyncDisc(){
+  const sel = ssDiscParse(ssEl('disc-type').value);
+  document.querySelectorAll('[data-disc]').forEach(function(b){
+    const L = b.getAttribute('data-disc');
+    b.classList.toggle('main', sel[0] === L);
+    b.classList.toggle('second', sel[1] === L);
+    b.setAttribute('aria-pressed', sel.indexOf(L) > -1 ? 'true' : 'false');
+  });
 }
 
 /* ---- форма: очистити / зібрати / заповнити ---- */
@@ -1315,6 +1430,7 @@ function ssClearForm(){
   SS_TEXT_IDS.forEach(function(id){ ssEl(id).value = ''; });
   document.querySelectorAll('[data-extra],[data-hyp-status],[data-goal-type]').forEach(function(el){ el.checked = false; });
   ssEl('ci-disc-status').value = 'Підтверджено';
+  ssSyncDisc();
 }
 
 function ssCollect(){
@@ -1395,6 +1511,7 @@ function ssFill(s){
   };
   Object.keys(text).forEach(function(id){ ssEl(id).value = text[id] || ''; });
   ssEl('ci-disc-status').value = ci.discStatus || 'Підтверджено';
+  ssSyncDisc();
 }
 
 function ssSetDisabled(disabled){
@@ -1468,7 +1585,7 @@ function ssRenderProgress(){
   const ordered = state.sessions.slice().sort(function(a,b){ return a.number - b.number; });
   let html = '<table class="score-table"><tr><th>Компетенція</th>'
     + ordered.map(function(s){ return '<th>'+escapeHtml(ssName(s.number))+'<br>'+escapeHtml(s.date || '')+'</th>'; }).join('') + '</tr>';
-  COMPETENCIES.forEach(function(c){
+  ssCompetencies().forEach(function(c){
     html += '<tr><td>'+escapeHtml(c)+'</td>' + ordered.map(function(s){
       const f = (s.softskills || []).find(function(x){ return x.c === c; });
       return '<td>'+((f && f.score !== null && f.score !== undefined) ? f.score : '—')+'</td>';
@@ -1558,6 +1675,36 @@ ssEl('add-experience-btn').addEventListener('click', function(){ ssAddExperience
 ssEl('add-skill-btn').addEventListener('click', function(){ ssAddCustom('skills', 'new-skill-input'); });
 ssEl('add-energize-btn').addEventListener('click', function(){ ssAddCustom('energize', 'new-energize-input'); });
 ssEl('add-drain-btn').addEventListener('click', function(){ ssAddCustom('drain', 'new-drain-input'); });
+ssEl('add-softskill-btn').addEventListener('click', ssAddSoftskill);
+ssEl('new-softskill-input').addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); ssAddSoftskill(); } });
+ssEl('session-softskills-table').addEventListener('click', function(e){
+  const name = e.target.getAttribute && e.target.getAttribute('data-ss-remove-soft');
+  if(!name || ssSoftskillUsed(name)) return;
+  const cur = ssReadSoftskills().filter(function(x){ return x.c !== name; });
+  state.startCustom.softskills = (state.startCustom.softskills || []).filter(function(x){ return x !== name; });
+  ssRenderSoftskills(cur);
+  ssRenderProgress();
+  saveState('ss-note');
+});
+ssEl('format-list').addEventListener('change', function(e){
+  const t = e.target;
+  if(t && t.type === 'radio'){
+    const hidden = t.closest('.scale-row').querySelector('[data-ss-format]');
+    if(hidden) hidden.value = t.value;
+  }
+});
+ssEl('disc-grid').addEventListener('click', function(e){
+  const b = e.target.closest('[data-disc]');
+  if(!b || b.disabled) return;
+  const L = b.getAttribute('data-disc');
+  let sel = ssDiscParse(ssEl('disc-type').value);
+  if(sel[0] === L){ sel = sel.slice(1); }
+  else if(sel[1] === L){ sel = [sel[0]]; }
+  else if(sel.length < 2){ sel.push(L); }
+  else { sel[1] = L; }
+  ssEl('disc-type').value = sel.join(' / ');
+  ssSyncDisc();
+});
 ssEl('curator-toggle').addEventListener('click', function(){
   if(curatorOn){ curatorOn = false; ssApplyCurator(); return; }
   const gate = ssEl('curator-gate');
